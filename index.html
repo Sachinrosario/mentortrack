@@ -1,0 +1,707 @@
+import { useState, useEffect, useRef } from "react";
+
+const SEED_MENTORS = [{"id":"TEST1","name":"Demo Mentor","dept":"Computer Application","email":"demo.mentor@college.edu"},{"id":"1","name":"Adhwadha","dept":"Botany"},{"id":"2","name":"Tajunnisa","dept":"Languages"},{"id":"3","name":"Ranbir W","dept":"English"},{"id":"4","name":"Trisha","dept":"Computer Application"},{"id":"5","name":"Rakesh","dept":"Computer Application"},{"id":"6","name":"Ramkali Sharma","dept":"English"},{"id":"7","name":"Pooja M. Prasad","dept":"Computer Application"},{"id":"8","name":"Rashmi","dept":"Kannada"},{"id":"9","name":"Madhura","dept":"Computer Application"},{"id":"10","name":"Amogh A.R","dept":"Computer Application"},{"id":"11","name":"Harshitha P.V","dept":"Computer Application"},{"id":"12","name":"Gayathri","dept":"Computer Application"},{"id":"13","name":"Pallavi","dept":"Commerce & Management"},{"id":"14","name":"Bindiya","dept":"Commerce & Management"},{"id":"15","name":"Jyothi","dept":"Commerce & Management"},{"id":"16","name":"Shashi Kumar A","dept":"Commerce & Management"},{"id":"17","name":"Venkatesha","dept":"Kannada"},{"id":"18","name":"Jayanth","dept":"Commerce & Management"},{"id":"19","name":"Kusuma","dept":"Commerce & Management"},{"id":"20","name":"Vasudha","dept":"Commerce & Management"},{"id":"21","name":"Sathyanarayanappa C.H","dept":"Commerce & Management"}];
+const SEED_STUDENTS = [{"id":"TEST101","name":"DEMO STUDENT","rollNo":"25DEMO001","combination":"MCS","class":"I BCA","mentorId":"TEST1","dropped":false},{"id":"1","name":"ADITHYA C M","rollNo":"","combination":"PCM","class":"II BSc","mentorId":"1","dropped":false},{"id":"2","name":"AKSHAT SHARMA","rollNo":"","combination":"CBEVS","class":"II BSc","mentorId":"1","dropped":false},{"id":"3","name":"BHUMIKA H A","rollNo":"","combination":"PCM","class":"II BSc","mentorId":"1","dropped":false},{"id":"4","name":"CHANDANA S","rollNo":"","combination":"CBEVS","class":"II BSc","mentorId":"1","dropped":false},{"id":"5","name":"CHETAN S","rollNo":"","combination":"CBEVS","class":"II BSc","mentorId":"1","dropped":false},{"id":"6","name":"DEEPIKA K T","rollNo":"","combination":"PCM","class":"II BSc","mentorId":"1","dropped":false},{"id":"7","name":"HEMANTH GOWDA R","rollNo":"","combination":"PCM","class":"II BSc","mentorId":"1","dropped":false},{"id":"8","name":"KANDUKURI ROHITH VARMA K","rollNo":"","combination":"PCM","class":"II BSc","mentorId":"1","dropped":false},{"id":"9","name":"LIKITH KUMAR P","rollNo":"","combination":"PCM","class":"II BSc","mentorId":"1","dropped":false},{"id":"10","name":"MUKTHA UNDIGER","rollNo":"","combination":"CBEVS","class":"II BSc","mentorId":"1","dropped":false},{"id":"11","name":"MURTHY B","rollNo":"","combination":"CBEVS","class":"II BSc","mentorId":"1","dropped":false},{"id":"12","name":"NANDITHA S","rollNo":"","combination":"PCM","class":"II BSc","mentorId":"1","dropped":false},{"id":"13","name":"PREETI","rollNo":"","combination":"CBEVS","class":"II BSc","mentorId":"1","dropped":false},{"id":"14","name":"PUSHPA S","rollNo":"","combination":"PCM","class":"II BSc","mentorId":"1","dropped":false},{"id":"15","name":"RAJAMMA C S","rollNo":"","combination":"PCM","class":"II BSc","mentorId":"1","dropped":false},{"id":"16","name":"RISHI N","rollNo":"","combination":"CBEVS","class":"II BSc","mentorId":"1","dropped":false},{"id":"17","name":"SAGAR MANTRI","rollNo":"","combination":"PCM","class":"II BSc","mentorId":"1","dropped":false},{"id":"18","name":"SURAJ KUMAR","rollNo":"","combination":"PCM","class":"II BSc","mentorId":"1","dropped":false},{"id":"19","name":"RENUKA","rollNo":"","combination":"PCM","class":"II BSc","mentorId":"1","dropped":false},{"id":"20","name":"CHAITHRA U R","rollNo":"","combination":"CEVS","class":"III BSc","mentorId":"1","dropped":false},{"id":"21","name":"GUNASEKARAN R","rollNo":"","combination":"CEVS","class":"III BSc","mentorId":"1","dropped":false},{"id":"22","name":"JYOTHI KUSHWAHA","rollNo":"","combination":"BC","class":"III BSc","mentorId":"1","dropped":false},{"id":"23","name":"LIKHITHA M B","rollNo":"","combination":"BC","class":"III BSc","mentorId":"1","dropped":false},{"id":"24","name":"MANOJ K","rollNo":"","combination":"BC","class":"III BSc","mentorId":"1","dropped":false},{"id":"25","name":"PRIYANKA","rollNo":"","combination":"CEVS","class":"III BSc","mentorId":"1","dropped":false},{"id":"26","name":"RANJUSHREE M","rollNo":"","combination":"BC","class":"III BSc","mentorId":"1","dropped":false},{"id":"27","name":"SNEHA V","rollNo":"","combination":"BEVS","class":"III BSc","mentorId":"1","dropped":false},{"id":"28","name":"THUSHAR S NAIR","rollNo":"","combination":"BC","class":"III BSc","mentorId":"1","dropped":false},{"id":"29","name":"UMERA TARANNUM","rollNo":"","combination":"BEVS","class":"III BSc","mentorId":"1","dropped":false},{"id":"30","name":"VINUTA R PATIL","rollNo":"","combination":"BC","class":"III BSc","mentorId":"1","dropped":false},{"id":"31","name":"ASTHA SINGH","rollNo":"","combination":"HEP","class":"II BA","mentorId":"2","dropped":false},{"id":"32","name":"H D SUHAS","rollNo":"","combination":"HEP","class":"II BA","mentorId":"2","dropped":false},{"id":"33","name":"HARSHA VARDHAN SINGH","rollNo":"","combination":"HEJ","class":"II BA","mentorId":"2","dropped":false},{"id":"34","name":"NAVEENKUMAR MALLAPPA DESHATTI","rollNo":"","combination":"HEP","class":"II BA","mentorId":"2","dropped":false},{"id":"35","name":"PANUSHREE B","rollNo":"","combination":"HEP","class":"II BA","mentorId":"2","dropped":false},{"id":"36","name":"POOJA S","rollNo":"","combination":"HEP","class":"II BA","mentorId":"2","dropped":false},{"id":"37","name":"POOJA T","rollNo":"","combination":"HEP","class":"II BA","mentorId":"2","dropped":false},{"id":"38","name":"PREETHI S","rollNo":"","combination":"HEJ","class":"II BA","mentorId":"2","dropped":false},{"id":"39","name":"RAMAPPA","rollNo":"","combination":"HEJ","class":"II BA","mentorId":"2","dropped":false},{"id":"40","name":"ROSHAN BEKAL","rollNo":"","combination":"HEP","class":"II BA","mentorId":"2","dropped":false},{"id":"41","name":"PRATAP","rollNo":"","combination":"HEP","class":"II BA","mentorId":"2","dropped":false},{"id":"42","name":"AKHIL KUMAR DUBEY","rollNo":"","combination":"HEP","class":"III BA","mentorId":"2","dropped":false},{"id":"43","name":"BHAVANA R","rollNo":"","combination":"HEJ","class":"III BA","mentorId":"2","dropped":false},{"id":"44","name":"BHAVYA MP","rollNo":"","combination":"HEP","class":"III BA","mentorId":"2","dropped":false},{"id":"45","name":"CHAITHRA P N","rollNo":"","combination":"HEJ","class":"III BA","mentorId":"2","dropped":false},{"id":"46","name":"DEEPAKCHANDRA C","rollNo":"","combination":"HEP","class":"III BA","mentorId":"2","dropped":false},{"id":"47","name":"NISARGA","rollNo":"","combination":"HEP","class":"III BA","mentorId":"2","dropped":false},{"id":"48","name":"PUNITH D S","rollNo":"","combination":"HEP","class":"III BA","mentorId":"2","dropped":false},{"id":"49","name":"REETHUSRHEE G H","rollNo":"","combination":"HEJ","class":"III BA","mentorId":"2","dropped":false},{"id":"50","name":"SPOORTHI S","rollNo":"","combination":"HEJ","class":"III BA","mentorId":"2","dropped":false},{"id":"51","name":"TEJAS N","rollNo":"","combination":"HEP","class":"III BA","mentorId":"2","dropped":false},{"id":"52","name":"AMITH KUMAR V","rollNo":"25BCA5035","combination":"","class":"I BCA","mentorId":"3","dropped":false},{"id":"53","name":"AMRUTHA S","rollNo":"25BCA5008","combination":"","class":"I BCA","mentorId":"3","dropped":false},{"id":"54","name":"AMULYA R","rollNo":"25BCA5036","combination":"","class":"I BCA","mentorId":"3","dropped":false},{"id":"55","name":"BHARATHI S","rollNo":"25BCI5077","combination":"","class":"I BCA","mentorId":"3","dropped":false},{"id":"56","name":"BHAVIKA SAIN A","rollNo":"25BCA5010","combination":"","class":"I BCA","mentorId":"3","dropped":false},{"id":"57","name":"BHUVAN H S","rollNo":"25BCA5032","combination":"","class":"I BCA","mentorId":"3","dropped":false},{"id":"58","name":"BINDU SHREE G","rollNo":"25BCA5011","combination":"","class":"I BCA","mentorId":"3","dropped":false},{"id":"59","name":"CHAITHRA S N","rollNo":"25BCA5039","combination":"","class":"I BCA","mentorId":"3","dropped":false},{"id":"60","name":"CHETHAN GOWDA V S","rollNo":"25BCI5076","combination":"","class":"I BCA","mentorId":"3","dropped":false},{"id":"61","name":"CHIRANJEEVI K","rollNo":"25BCA5013","combination":"","class":"I BCA","mentorId":"3","dropped":false},{"id":"62","name":"DEEPAK B K","rollNo":"25BCA5038","combination":"","class":"I BCA","mentorId":"3","dropped":false},{"id":"63","name":"DHANUSH G","rollNo":"25BCA5029","combination":"","class":"I BCA","mentorId":"3","dropped":false},{"id":"64","name":"DILIPAN L","rollNo":"25BCA5030","combination":"","class":"I BCA","mentorId":"3","dropped":false},{"id":"65","name":"GOURAV KULKARNI","rollNo":"25BCA5014","combination":"","class":"I BCA","mentorId":"3","dropped":false},{"id":"66","name":"HARINI V","rollNo":"25BCA5040","combination":"","class":"I BCA","mentorId":"3","dropped":false},{"id":"67","name":"KARTHIK M P","rollNo":"25BCA5034","combination":"","class":"I BCA","mentorId":"3","dropped":false},{"id":"68","name":"KEERTHANA V","rollNo":"25BCA5012","combination":"","class":"I BCA","mentorId":"3","dropped":false},{"id":"69","name":"MOHAMMED AZEEZUDDIN","rollNo":"25BCA5016","combination":"","class":"I BCA","mentorId":"3","dropped":false},{"id":"70","name":"NANDINI H","rollNo":"25BCA5028","combination":"","class":"I BCA","mentorId":"3","dropped":false},{"id":"71","name":"NARASIMHA GOWDA U","rollNo":"25BCA5041","combination":"","class":"I BCA","mentorId":"3","dropped":false},{"id":"72","name":"PAVITHRA D R","rollNo":"25BCA5005","combination":"","class":"I BCA","mentorId":"3","dropped":false},{"id":"73","name":"RAHUL ADITYA N","rollNo":"25BCA5022","combination":"","class":"I BCA","mentorId":"3","dropped":false},{"id":"74","name":"SANTHOSH M","rollNo":"25BCA5026","combination":"","class":"I BCA","mentorId":"3","dropped":false},{"id":"75","name":"VATHSALYA B","rollNo":"25BCA5003","combination":"","class":"I BCA","mentorId":"3","dropped":false},{"id":"76","name":"VISHAL K","rollNo":"25BCA5001","combination":"","class":"I BCA","mentorId":"3","dropped":false},{"id":"77","name":"AISHWARYA C D","rollNo":"25BCI5070","combination":"","class":"I BCA","mentorId":"4","dropped":false},{"id":"78","name":"AKASH S","rollNo":"25BCI5025","combination":"","class":"I BCA","mentorId":"4","dropped":false},{"id":"79","name":"AMIT KUMAR GIRI","rollNo":"25BCI5060","combination":"","class":"I BCA","mentorId":"4","dropped":false},{"id":"80","name":"AMULYA K","rollNo":"25BCI5043","combination":"","class":"I BCA","mentorId":"4","dropped":false},{"id":"81","name":"ANANYA S","rollNo":"25BCI5059","combination":"","class":"I BCA","mentorId":"4","dropped":false},{"id":"82","name":"ANIL MALAGOUDA PATIL","rollNo":"25BCI5048","combination":"","class":"I BCA","mentorId":"4","dropped":false},{"id":"83","name":"BINDU B","rollNo":"25BCI5031","combination":"","class":"I BCA","mentorId":"4","dropped":false},{"id":"84","name":"CHANDAN R","rollNo":"25BCI5009","combination":"","class":"I BCA","mentorId":"4","dropped":false},{"id":"85","name":"CHANDANA R","rollNo":"25BCI5061","combination":"","class":"I BCA","mentorId":"4","dropped":false},{"id":"86","name":"CHARAN M R","rollNo":"25BCI5041","combination":"","class":"I BCA","mentorId":"4","dropped":false},{"id":"87","name":"CHETHAN B R","rollNo":"25BCI5083","combination":"","class":"I BCA","mentorId":"4","dropped":false},{"id":"88","name":"CHETHAN M","rollNo":"25BCI5007","combination":"","class":"I BCA","mentorId":"4","dropped":false},{"id":"89","name":"CHIRAG M S","rollNo":"25BCI5054","combination":"","class":"I BCA","mentorId":"4","dropped":false},{"id":"90","name":"DEEPA SHREE V G","rollNo":"25BCI5039","combination":"","class":"I BCA","mentorId":"4","dropped":false},{"id":"91","name":"DHANALAKSHMI N","rollNo":"25BCI5063","combination":"","class":"I BCA","mentorId":"4","dropped":false},{"id":"92","name":"DHANUSH K G","rollNo":"25BCI5008","combination":"","class":"I BCA","mentorId":"4","dropped":false},{"id":"93","name":"DHANUSH R","rollNo":"25BCI5065","combination":"","class":"I BCA","mentorId":"4","dropped":false},{"id":"94","name":"DHRUTHI","rollNo":"25BCI5002","combination":"","class":"I BCA","mentorId":"4","dropped":false},{"id":"95","name":"GOWRI B U","rollNo":"25BCI5012","combination":"","class":"I BCA","mentorId":"4","dropped":false},{"id":"96","name":"HARSHA B S","rollNo":"25BCI5018","combination":"","class":"I BCA","mentorId":"4","dropped":false},{"id":"97","name":"HEMA CHANDAN GOWDA A","rollNo":"25BCI5014","combination":"","class":"I BCA","mentorId":"4","dropped":false},{"id":"98","name":"HEMASHREE K","rollNo":"25BCI5064","combination":"","class":"I BCA","mentorId":"4","dropped":false},{"id":"99","name":"JAYASURYA B M","rollNo":"25BCI5020","combination":"","class":"I BCA","mentorId":"4","dropped":false},{"id":"100","name":"JEEVAN G","rollNo":"25BCI5024","combination":"","class":"I BCA","mentorId":"4","dropped":false},{"id":"101","name":"JEEVIKA D H","rollNo":"25BCI5084","combination":"","class":"I BCA","mentorId":"4","dropped":false},{"id":"102","name":"KAVYA S","rollNo":"25BCI5056","combination":"","class":"I BCA","mentorId":"4","dropped":false},{"id":"103","name":"KEELU JAYASRI","rollNo":"25BCI5027","combination":"","class":"I BCA","mentorId":"4","dropped":false},{"id":"104","name":"KEERTHANA","rollNo":"25BCI5044","combination":"","class":"I BCA","mentorId":"4","dropped":false},{"id":"105","name":"KISHAN YOGESH KUNTE","rollNo":"25BCI5057","combination":"","class":"I BCA","mentorId":"4","dropped":false},{"id":"106","name":"LIKHITHA B H","rollNo":"25BCI5028","combination":"","class":"I BCA","mentorId":"4","dropped":false},{"id":"107","name":"LIKHITHA G V","rollNo":"25BCI5052","combination":"","class":"I BCA","mentorId":"5","dropped":false},{"id":"108","name":"MADHURYA V","rollNo":"25BCI5029","combination":"","class":"I BCA","mentorId":"5","dropped":false},{"id":"109","name":"MANAL FATIMA SIKANDAR TAHASILDAR","rollNo":"25BCI5067","combination":"","class":"I BCA","mentorId":"5","dropped":false},{"id":"110","name":"MANJUNATH R","rollNo":"25BCI5037","combination":"","class":"I BCA","mentorId":"5","dropped":false},{"id":"111","name":"MANOGNA G","rollNo":"25BCI5046","combination":"","class":"I BCA","mentorId":"5","dropped":false},{"id":"112","name":"MANOJ S K","rollNo":"25BCI5015","combination":"","class":"I BCA","mentorId":"5","dropped":false},{"id":"113","name":"MANYA","rollNo":"25BCI5047","combination":"","class":"I BCA","mentorId":"5","dropped":false},{"id":"114","name":"MEGHANA M A","rollNo":"25BCI5011","combination":"","class":"I BCA","mentorId":"5","dropped":false},{"id":"115","name":"MOHAN K","rollNo":"25BCI5053","combination":"","class":"I BCA","mentorId":"5","dropped":false},{"id":"116","name":"MONISHA S","rollNo":"25BCI5017","combination":"","class":"I BCA","mentorId":"5","dropped":false},{"id":"117","name":"NANDINI N","rollNo":"25BCI5066","combination":"","class":"I BCA","mentorId":"5","dropped":false},{"id":"118","name":"NATARAJ K","rollNo":"25BCI5006","combination":"","class":"I BCA","mentorId":"5","dropped":false},{"id":"119","name":"OSROCK ANTHONY MARTIN","rollNo":"25BCI5003","combination":"","class":"I BCA","mentorId":"5","dropped":false},{"id":"120","name":"PALLAVI M BADIGER","rollNo":"25BCI5022","combination":"","class":"I BCA","mentorId":"5","dropped":false},{"id":"121","name":"PRASAD KUMBAR","rollNo":"25BCI5069","combination":"","class":"I BCA","mentorId":"5","dropped":false},{"id":"122","name":"PREETHAM K","rollNo":"25BCI5040","combination":"","class":"I BCA","mentorId":"5","dropped":false},{"id":"123","name":"PUSHPA P","rollNo":"25BCI5023","combination":"","class":"I BCA","mentorId":"5","dropped":false},{"id":"124","name":"RAMYA PRABHAKAR","rollNo":"25BCI5030","combination":"","class":"I BCA","mentorId":"5","dropped":false},{"id":"125","name":"ROHINI S","rollNo":"25BCI5033","combination":"","class":"I BCA","mentorId":"5","dropped":false},{"id":"126","name":"ROHITH N","rollNo":"25BCI5036","combination":"","class":"I BCA","mentorId":"5","dropped":false},{"id":"127","name":"S P ESHWAR SWAMY","rollNo":"25BCI5068","combination":"","class":"I BCA","mentorId":"5","dropped":false},{"id":"128","name":"S POORNIMA","rollNo":"25BCI5032","combination":"","class":"I BCA","mentorId":"5","dropped":false},{"id":"129","name":"SACHIN H P","rollNo":"25BCI5038","combination":"","class":"I BCA","mentorId":"5","dropped":false},{"id":"130","name":"SHASHANK K J","rollNo":"25BCI5058","combination":"","class":"I BCA","mentorId":"5","dropped":false},{"id":"131","name":"SHASHIKALA G H","rollNo":"25BCI5016","combination":"","class":"I BCA","mentorId":"5","dropped":false},{"id":"132","name":"SHIRISH","rollNo":"25BCI5055","combination":"","class":"I BCA","mentorId":"5","dropped":false},{"id":"133","name":"SHUBHAM VAISHNAV","rollNo":"25BCI5062","combination":"","class":"I BCA","mentorId":"5","dropped":false},{"id":"134","name":"SOMASHEKAR","rollNo":"25BCI5035","combination":"","class":"I BCA","mentorId":"5","dropped":false},{"id":"135","name":"SRUSHTI B C","rollNo":"25BCI5073","combination":"","class":"I BCA","mentorId":"5","dropped":false},{"id":"136","name":"SUCHITHRA","rollNo":"25BCI5071","combination":"","class":"I BCA","mentorId":"5","dropped":false},{"id":"137","name":"SULTHANA A","rollNo":"25BCI5005","combination":"","class":"I BCA","mentorId":"6","dropped":false},{"id":"138","name":"THANMAYI S","rollNo":"25BCI5010","combination":"","class":"I BCA","mentorId":"6","dropped":false},{"id":"139","name":"ULLAS H M","rollNo":"25BCI5013","combination":"","class":"I BCA","mentorId":"6","dropped":false},{"id":"140","name":"VANDANA V","rollNo":"25BCI5042","combination":"","class":"I BCA","mentorId":"6","dropped":false},{"id":"141","name":"VARALAKSHMI K D","rollNo":"25BCI5004","combination":"","class":"I BCA","mentorId":"6","dropped":false},{"id":"142","name":"VARSHINI H","rollNo":"25BCI5021","combination":"","class":"I BCA","mentorId":"6","dropped":false},{"id":"143","name":"VENKATESH M","rollNo":"25BCI5049","combination":"","class":"I BCA","mentorId":"6","dropped":false},{"id":"144","name":"VIKAS M","rollNo":"25BCI5019","combination":"","class":"I BCA","mentorId":"6","dropped":false},{"id":"145","name":"YASHAS M","rollNo":"25BCI5051","combination":"","class":"I BCA","mentorId":"6","dropped":false},{"id":"146","name":"YASHAS Y G","rollNo":"25BCI5026","combination":"","class":"I BCA","mentorId":"6","dropped":false},{"id":"147","name":"YASHASWINI E","rollNo":"25BCI5045","combination":"","class":"I BCA","mentorId":"6","dropped":false},{"id":"148","name":"YATHEESH KUMAR M","rollNo":"25BCI5082","combination":"","class":"I BCA","mentorId":"6","dropped":false},{"id":"149","name":"SHREYAS S WAGLE","rollNo":"25BCI5078","combination":"","class":"I BCA","mentorId":"6","dropped":false},{"id":"150","name":"DEEKSHITH M","rollNo":"25BCI5072","combination":"","class":"I BCA","mentorId":"6","dropped":false},{"id":"151","name":"MAHESH R","rollNo":"25BCI5079","combination":"","class":"I BCA","mentorId":"6","dropped":false},{"id":"152","name":"NIKHIL S J","rollNo":"25BCI5074","combination":"","class":"I BCA","mentorId":"6","dropped":false},{"id":"153","name":"PRAJWAL H","rollNo":"25BCI5080","combination":"","class":"I BCA","mentorId":"6","dropped":false},{"id":"154","name":"VARUN RAO","rollNo":"25BCI5081","combination":"","class":"I BCA","mentorId":"6","dropped":false},{"id":"155","name":"YASHIKA PATEL P","rollNo":"25BCI5088","combination":"","class":"I BCA","mentorId":"6","dropped":false},{"id":"156","name":"ISHWARYA G N","rollNo":"25BCI5089","combination":"","class":"I BCA","mentorId":"6","dropped":false},{"id":"157","name":"SURYA R","rollNo":"25BCI5085","combination":"","class":"I BCA","mentorId":"6","dropped":false},{"id":"158","name":"ARVIND BHATI N","rollNo":"25BCI5075","combination":"","class":"I BCA","mentorId":"6","dropped":false},{"id":"159","name":"KAVANA A","rollNo":"25BCI5087","combination":"","class":"I BCA","mentorId":"6","dropped":false},{"id":"160","name":"CHANDRAPRAKASH S","rollNo":"25BCI5090","combination":"","class":"I BCA","mentorId":"6","dropped":false},{"id":"161","name":"ABHISHEK REDDY","rollNo":"","combination":"","class":"II BCA","mentorId":"7","dropped":false},{"id":"162","name":"ABHISHEK YADAV","rollNo":"","combination":"","class":"II BCA","mentorId":"7","dropped":false},{"id":"163","name":"ADIL KHAN L","rollNo":"","combination":"","class":"II BCA","mentorId":"7","dropped":false},{"id":"164","name":"AMULYA P","rollNo":"","combination":"","class":"II BCA","mentorId":"7","dropped":false},{"id":"165","name":"ANKUR UPADHAYA","rollNo":"","combination":"","class":"II BCA","mentorId":"7","dropped":false},{"id":"166","name":"ANURAG VISHWAKARMA","rollNo":"","combination":"","class":"II BCA","mentorId":"7","dropped":false},{"id":"167","name":"ANUSHA A","rollNo":"","combination":"","class":"II BCA","mentorId":"7","dropped":false},{"id":"168","name":"ASHOK MURMU K","rollNo":"","combination":"","class":"II BCA","mentorId":"7","dropped":false},{"id":"169","name":"AVINASH","rollNo":"","combination":"","class":"II BCA","mentorId":"7","dropped":false},{"id":"170","name":"BHARATH YADAV D","rollNo":"","combination":"","class":"II BCA","mentorId":"7","dropped":false},{"id":"171","name":"C PRAVEEN","rollNo":"","combination":"","class":"II BCA","mentorId":"7","dropped":false},{"id":"172","name":"CHAITHRA L","rollNo":"","combination":"","class":"II BCA","mentorId":"7","dropped":false},{"id":"173","name":"CHARAN S","rollNo":"","combination":"","class":"II BCA","mentorId":"7","dropped":false},{"id":"174","name":"DARSHAN A K","rollNo":"","combination":"","class":"II BCA","mentorId":"7","dropped":false},{"id":"175","name":"DEEKSHA GOWDA P","rollNo":"","combination":"","class":"II BCA","mentorId":"7","dropped":false},{"id":"176","name":"DEEKSHITHA K","rollNo":"","combination":"","class":"II BCA","mentorId":"7","dropped":false},{"id":"177","name":"DEEPA M S","rollNo":"","combination":"","class":"II BCA","mentorId":"7","dropped":false},{"id":"178","name":"DEEPAK N","rollNo":"","combination":"","class":"II BCA","mentorId":"7","dropped":false},{"id":"179","name":"DHANYASHREE H D","rollNo":"","combination":"","class":"II BCA","mentorId":"7","dropped":false},{"id":"180","name":"DIVYA M R","rollNo":"","combination":"","class":"II BCA","mentorId":"7","dropped":false},{"id":"181","name":"E SAILAKSHMI GOUD","rollNo":"","combination":"","class":"II BCA","mentorId":"7","dropped":false},{"id":"182","name":"GAGAN J","rollNo":"","combination":"","class":"II BCA","mentorId":"7","dropped":false},{"id":"183","name":"GAGAN P","rollNo":"","combination":"","class":"II BCA","mentorId":"7","dropped":false},{"id":"184","name":"GOPIKRISHNA A S","rollNo":"","combination":"","class":"II BCA","mentorId":"7","dropped":false},{"id":"185","name":"GURU N","rollNo":"","combination":"","class":"II BCA","mentorId":"7","dropped":false},{"id":"186","name":"HARISH KUMAR S","rollNo":"","combination":"","class":"II BCA","mentorId":"7","dropped":false},{"id":"187","name":"HARSHAVARDHAN M","rollNo":"","combination":"","class":"II BCA","mentorId":"7","dropped":false},{"id":"188","name":"HARSHITHA N","rollNo":"","combination":"","class":"II BCA","mentorId":"8","dropped":false},{"id":"189","name":"HARSHITHA N (2)","rollNo":"","combination":"","class":"II BCA","mentorId":"8","dropped":false},{"id":"190","name":"HARSHITHA T","rollNo":"","combination":"","class":"II BCA","mentorId":"8","dropped":false},{"id":"191","name":"INDUSHREE","rollNo":"","combination":"","class":"II BCA","mentorId":"8","dropped":false},{"id":"192","name":"JAYANTH V","rollNo":"","combination":"","class":"II BCA","mentorId":"8","dropped":false},{"id":"193","name":"KARTHIK B A","rollNo":"","combination":"","class":"II BCA","mentorId":"8","dropped":false},{"id":"194","name":"KARTHIK S K","rollNo":"","combination":"","class":"II BCA","mentorId":"8","dropped":false},{"id":"195","name":"KARTIKEY SINGH","rollNo":"","combination":"","class":"II BCA","mentorId":"8","dropped":false},{"id":"196","name":"KEERTHI","rollNo":"","combination":"","class":"II BCA","mentorId":"8","dropped":false},{"id":"197","name":"KUSHAL GOWDA L","rollNo":"","combination":"","class":"II BCA","mentorId":"8","dropped":false},{"id":"198","name":"KUSHAL N S","rollNo":"","combination":"","class":"II BCA","mentorId":"8","dropped":false},{"id":"199","name":"LIKHITHA K","rollNo":"","combination":"","class":"II BCA","mentorId":"8","dropped":false},{"id":"200","name":"LIKITH C N","rollNo":"","combination":"","class":"II BCA","mentorId":"8","dropped":false},{"id":"201","name":"LIKITH GOWDA C","rollNo":"","combination":"","class":"II BCA","mentorId":"8","dropped":false},{"id":"202","name":"M RASHMI REDDY","rollNo":"","combination":"","class":"II BCA","mentorId":"8","dropped":false},{"id":"203","name":"MAGRE SHAM MAHADEV","rollNo":"","combination":"","class":"II BCA","mentorId":"8","dropped":false},{"id":"204","name":"MANASA D","rollNo":"","combination":"","class":"II BCA","mentorId":"8","dropped":false},{"id":"205","name":"MANEESH YADAV D","rollNo":"","combination":"","class":"II BCA","mentorId":"8","dropped":false},{"id":"206","name":"MANNEPALLI VAISHNAVI","rollNo":"","combination":"","class":"II BCA","mentorId":"8","dropped":false},{"id":"207","name":"MANOJ T N","rollNo":"","combination":"","class":"II BCA","mentorId":"8","dropped":false},{"id":"208","name":"MEHUL CHOWDHARY V","rollNo":"","combination":"","class":"II BCA","mentorId":"8","dropped":false},{"id":"209","name":"MOHAN BABU R","rollNo":"","combination":"","class":"II BCA","mentorId":"8","dropped":false},{"id":"210","name":"MOHAN KUMAR P R","rollNo":"","combination":"","class":"II BCA","mentorId":"8","dropped":false},{"id":"211","name":"MOHAN R","rollNo":"","combination":"","class":"II BCA","mentorId":"8","dropped":false},{"id":"212","name":"MEENAKSHI","rollNo":"","combination":"","class":"II BCA","mentorId":"8","dropped":false},{"id":"213","name":"MONISHA S","rollNo":"","combination":"","class":"II BCA","mentorId":"8","dropped":false},{"id":"214","name":"NANDISH G PRABHU","rollNo":"","combination":"","class":"II BCA","mentorId":"8","dropped":false},{"id":"215","name":"SATHISH S","rollNo":"","combination":"","class":"II BCA","mentorId":"9","dropped":false},{"id":"216","name":"SHANTH KUMAR","rollNo":"","combination":"","class":"II BCA","mentorId":"9","dropped":false},{"id":"217","name":"SHREESHANTH S A","rollNo":"","combination":"","class":"II BCA","mentorId":"9","dropped":false},{"id":"218","name":"SHREYAS RAVI NAIK","rollNo":"","combination":"","class":"II BCA","mentorId":"9","dropped":false},{"id":"219","name":"SOUMYA","rollNo":"","combination":"","class":"II BCA","mentorId":"9","dropped":false},{"id":"220","name":"SRINANDAN K","rollNo":"","combination":"","class":"II BCA","mentorId":"9","dropped":false},{"id":"221","name":"SRINIKHA N","rollNo":"","combination":"","class":"II BCA","mentorId":"9","dropped":false},{"id":"222","name":"SUDEEP","rollNo":"","combination":"","class":"II BCA","mentorId":"9","dropped":false},{"id":"223","name":"SUPRIYA BAI R","rollNo":"","combination":"","class":"II BCA","mentorId":"9","dropped":false},{"id":"224","name":"UDAY C","rollNo":"","combination":"","class":"II BCA","mentorId":"9","dropped":false},{"id":"225","name":"USHA RANI K","rollNo":"","combination":"","class":"II BCA","mentorId":"9","dropped":false},{"id":"226","name":"USHA Y V","rollNo":"","combination":"","class":"II BCA","mentorId":"9","dropped":false},{"id":"227","name":"VAIBHAV R","rollNo":"","combination":"","class":"II BCA","mentorId":"9","dropped":false},{"id":"228","name":"VAISHNAVI SHANKAR","rollNo":"","combination":"","class":"II BCA","mentorId":"9","dropped":false},{"id":"229","name":"VIKAS K M","rollNo":"","combination":"","class":"II BCA","mentorId":"9","dropped":false},{"id":"230","name":"VIKAS M","rollNo":"","combination":"","class":"II BCA","mentorId":"9","dropped":false},{"id":"231","name":"VINAY C S","rollNo":"","combination":"","class":"II BCA","mentorId":"9","dropped":false},{"id":"232","name":"VINAY G","rollNo":"","combination":"","class":"II BCA","mentorId":"9","dropped":false},{"id":"233","name":"VINOD S","rollNo":"","combination":"","class":"II BCA","mentorId":"9","dropped":false},{"id":"234","name":"VISHAL R ASOPA","rollNo":"","combination":"","class":"II BCA","mentorId":"9","dropped":false},{"id":"235","name":"VISHWAS M","rollNo":"","combination":"","class":"II BCA","mentorId":"9","dropped":false},{"id":"236","name":"YASHASWINI T","rollNo":"","combination":"","class":"II BCA","mentorId":"9","dropped":false},{"id":"237","name":"YASHWANTH K","rollNo":"","combination":"","class":"II BCA","mentorId":"9","dropped":false},{"id":"238","name":"YASHWANTH L R","rollNo":"","combination":"","class":"II BCA","mentorId":"9","dropped":false},{"id":"239","name":"YOGESH L","rollNo":"","combination":"","class":"II BCA","mentorId":"9","dropped":false},{"id":"240","name":"YOGITHA S","rollNo":"","combination":"","class":"II BCA","mentorId":"9","dropped":false},{"id":"241","name":"NANDITHA G N","rollNo":"","combination":"","class":"II BCA","mentorId":"10","dropped":false},{"id":"242","name":"NAVEEN KUMAR V H","rollNo":"","combination":"","class":"II BCA","mentorId":"10","dropped":false},{"id":"243","name":"NAVYA CHANDRU","rollNo":"","combination":"","class":"II BCA","mentorId":"10","dropped":false},{"id":"244","name":"NETHRA B","rollNo":"","combination":"","class":"II BCA","mentorId":"10","dropped":false},{"id":"245","name":"NITHIN GOWDA N","rollNo":"","combination":"","class":"II BCA","mentorId":"10","dropped":false},{"id":"246","name":"P N MANOJ KUMAR","rollNo":"","combination":"","class":"II BCA","mentorId":"10","dropped":false},{"id":"247","name":"PALLAVI P","rollNo":"","combination":"","class":"II BCA","mentorId":"10","dropped":false},{"id":"248","name":"PRAGATHI N","rollNo":"","combination":"","class":"II BCA","mentorId":"10","dropped":false},{"id":"249","name":"PRAJWAL C","rollNo":"","combination":"","class":"II BCA","mentorId":"10","dropped":false},{"id":"250","name":"PRAJWAL N","rollNo":"","combination":"","class":"II BCA","mentorId":"10","dropped":false},{"id":"251","name":"PRATHAM R","rollNo":"","combination":"","class":"II BCA","mentorId":"10","dropped":false},{"id":"252","name":"PREETHAM M","rollNo":"","combination":"","class":"II BCA","mentorId":"10","dropped":false},{"id":"253","name":"PREETHI C","rollNo":"","combination":"","class":"II BCA","mentorId":"10","dropped":false},{"id":"254","name":"PRIYANKA G","rollNo":"","combination":"","class":"II BCA","mentorId":"10","dropped":false},{"id":"255","name":"RAJESHWARI M","rollNo":"","combination":"","class":"II BCA","mentorId":"10","dropped":false},{"id":"256","name":"RAMYA R","rollNo":"","combination":"","class":"II BCA","mentorId":"10","dropped":false},{"id":"257","name":"RENUKA M","rollNo":"","combination":"","class":"II BCA","mentorId":"10","dropped":false},{"id":"258","name":"ROHITH RAGHAVA G","rollNo":"","combination":"","class":"II BCA","mentorId":"10","dropped":false},{"id":"259","name":"ROHITH S","rollNo":"","combination":"","class":"II BCA","mentorId":"10","dropped":false},{"id":"260","name":"ROSHAN D SOUZA","rollNo":"","combination":"","class":"II BCA","mentorId":"10","dropped":false},{"id":"261","name":"SACHIN REDDY","rollNo":"","combination":"","class":"II BCA","mentorId":"10","dropped":false},{"id":"262","name":"SAHANA S","rollNo":"","combination":"","class":"II BCA","mentorId":"10","dropped":false},{"id":"263","name":"SAKSHI","rollNo":"","combination":"","class":"II BCA","mentorId":"10","dropped":false},{"id":"264","name":"SANDHYA G","rollNo":"","combination":"","class":"II BCA","mentorId":"10","dropped":false},{"id":"265","name":"SANIYA","rollNo":"","combination":"","class":"II BCA","mentorId":"10","dropped":false},{"id":"266","name":"SANTHOSH S","rollNo":"","combination":"","class":"II BCA","mentorId":"10","dropped":false},{"id":"267","name":"SATHISH KUMAR H","rollNo":"","combination":"","class":"II BCA","mentorId":"10","dropped":false},{"id":"268","name":"ABHILASH A","rollNo":"","combination":"","class":"III BCA","mentorId":"11","dropped":false},{"id":"269","name":"ABHISHEK GOWDA K R","rollNo":"","combination":"","class":"III BCA","mentorId":"11","dropped":false},{"id":"270","name":"AISHWARYA P","rollNo":"","combination":"","class":"III BCA","mentorId":"11","dropped":false},{"id":"271","name":"AKASH H A","rollNo":"","combination":"","class":"III BCA","mentorId":"11","dropped":false},{"id":"272","name":"AMITH C","rollNo":"","combination":"","class":"III BCA","mentorId":"11","dropped":false},{"id":"273","name":"AMRUTHA P","rollNo":"","combination":"","class":"III BCA","mentorId":"11","dropped":false},{"id":"274","name":"ANJALI R","rollNo":"","combination":"","class":"III BCA","mentorId":"11","dropped":false},{"id":"275","name":"ANUSH BHARADWAJ M","rollNo":"","combination":"","class":"III BCA","mentorId":"11","dropped":false},{"id":"276","name":"ARUN KUMAR S","rollNo":"","combination":"","class":"III BCA","mentorId":"11","dropped":false},{"id":"277","name":"ASHWATH J","rollNo":"","combination":"","class":"III BCA","mentorId":"11","dropped":false},{"id":"278","name":"GAGAN T N","rollNo":"","combination":"","class":"III BCA","mentorId":"11","dropped":false},{"id":"279","name":"GIRISH","rollNo":"","combination":"","class":"III BCA","mentorId":"11","dropped":false},{"id":"280","name":"GOWDA NIKSHITA CHANDRASHEKAR","rollNo":"","combination":"","class":"III BCA","mentorId":"11","dropped":false},{"id":"281","name":"HARSHA R","rollNo":"","combination":"","class":"III BCA","mentorId":"11","dropped":false},{"id":"282","name":"HARSHAVARDINI L","rollNo":"","combination":"","class":"III BCA","mentorId":"11","dropped":false},{"id":"283","name":"HARSHITHA M S","rollNo":"","combination":"","class":"III BCA","mentorId":"11","dropped":false},{"id":"284","name":"HEMANTH T N","rollNo":"","combination":"","class":"III BCA","mentorId":"11","dropped":false},{"id":"285","name":"JAYANTH N","rollNo":"","combination":"","class":"III BCA","mentorId":"11","dropped":false},{"id":"286","name":"KANAKA SINDHU A","rollNo":"","combination":"","class":"III BCA","mentorId":"11","dropped":false},{"id":"287","name":"KAVYA R","rollNo":"","combination":"","class":"III BCA","mentorId":"11","dropped":false},{"id":"288","name":"KEERTHANA R","rollNo":"","combination":"","class":"III BCA","mentorId":"11","dropped":false},{"id":"289","name":"KEERTHANA R (2)","rollNo":"","combination":"","class":"III BCA","mentorId":"11","dropped":false},{"id":"290","name":"KISHORE S GOWDA","rollNo":"","combination":"","class":"III BCA","mentorId":"11","dropped":false},{"id":"291","name":"LAKSHMI B R","rollNo":"","combination":"","class":"III BCA","mentorId":"11","dropped":false},{"id":"292","name":"LIKITHA A","rollNo":"","combination":"","class":"III BCA","mentorId":"11","dropped":false},{"id":"293","name":"LIKITHA M","rollNo":"","combination":"","class":"III BCA","mentorId":"11","dropped":false},{"id":"294","name":"LOKESHWARI S","rollNo":"","combination":"","class":"III BCA","mentorId":"11","dropped":false},{"id":"295","name":"MADHAN KUMAR R","rollNo":"","combination":"","class":"III BCA","mentorId":"12","dropped":false},{"id":"296","name":"MADHAN S","rollNo":"","combination":"","class":"III BCA","mentorId":"12","dropped":false},{"id":"297","name":"MOHAMMED ASIF","rollNo":"","combination":"","class":"III BCA","mentorId":"12","dropped":false},{"id":"298","name":"MONISH KUMAR M","rollNo":"","combination":"","class":"III BCA","mentorId":"12","dropped":false},{"id":"299","name":"NIDASANAMETLA SRAVANTHI","rollNo":"","combination":"","class":"III BCA","mentorId":"12","dropped":false},{"id":"300","name":"PRAJWAL K","rollNo":"","combination":"","class":"III BCA","mentorId":"12","dropped":false},{"id":"301","name":"PRAJWAL N","rollNo":"","combination":"","class":"III BCA","mentorId":"12","dropped":false},{"id":"302","name":"PRASHANTH D","rollNo":"","combination":"","class":"III BCA","mentorId":"12","dropped":false},{"id":"303","name":"PRAVEEN H S","rollNo":"","combination":"","class":"III BCA","mentorId":"12","dropped":false},{"id":"304","name":"PUNEETH L","rollNo":"","combination":"","class":"III BCA","mentorId":"12","dropped":false},{"id":"305","name":"RAGHUNANDHAN P","rollNo":"","combination":"","class":"III BCA","mentorId":"12","dropped":false},{"id":"306","name":"RAKSHITHA K V","rollNo":"","combination":"","class":"III BCA","mentorId":"12","dropped":false},{"id":"307","name":"RAKSHITHA V","rollNo":"","combination":"","class":"III BCA","mentorId":"12","dropped":false},{"id":"308","name":"RANJITHA C","rollNo":"","combination":"","class":"III BCA","mentorId":"12","dropped":false},{"id":"309","name":"ROHITH T V","rollNo":"","combination":"","class":"III BCA","mentorId":"12","dropped":false},{"id":"310","name":"RUPESH H Y","rollNo":"","combination":"","class":"III BCA","mentorId":"12","dropped":false},{"id":"311","name":"SHIVANANDHA B G","rollNo":"","combination":"","class":"III BCA","mentorId":"12","dropped":false},{"id":"312","name":"SINCHANA V S","rollNo":"","combination":"","class":"III BCA","mentorId":"12","dropped":false},{"id":"313","name":"SOUNDARYA M","rollNo":"","combination":"","class":"III BCA","mentorId":"12","dropped":false},{"id":"314","name":"SRUJANA R","rollNo":"","combination":"","class":"III BCA","mentorId":"12","dropped":false},{"id":"315","name":"SUMANTH S KAUSHIK","rollNo":"","combination":"","class":"III BCA","mentorId":"12","dropped":false},{"id":"316","name":"SUSHMITHA C","rollNo":"","combination":"","class":"III BCA","mentorId":"12","dropped":false},{"id":"317","name":"VAISHNAVI E S","rollNo":"","combination":"","class":"III BCA","mentorId":"12","dropped":false},{"id":"318","name":"VARSHITHA M","rollNo":"","combination":"","class":"III BCA","mentorId":"12","dropped":false},{"id":"319","name":"VISHWASACHARI T","rollNo":"","combination":"","class":"III BCA","mentorId":"12","dropped":false},{"id":"320","name":"YASHAS KRISHNA M","rollNo":"","combination":"","class":"III BCA","mentorId":"12","dropped":false},{"id":"321","name":"YASHWANTH GOWDA S","rollNo":"","combination":"","class":"III BCA","mentorId":"12","dropped":false},{"id":"322","name":"ABHINAYA R","rollNo":"25BBA5017","combination":"","class":"I BBA","mentorId":"13","dropped":false},{"id":"323","name":"BHAVNA KUMARI","rollNo":"25BBA5020","combination":"","class":"I BBA","mentorId":"13","dropped":false},{"id":"324","name":"HEERA RAM","rollNo":"25BBA5025","combination":"","class":"I BBA","mentorId":"13","dropped":false},{"id":"325","name":"HRITHWIK SATHEESH","rollNo":"25BBA5019","combination":"","class":"I BBA","mentorId":"13","dropped":false},{"id":"326","name":"LIKITH GOWDA H D","rollNo":"25BBA5023","combination":"","class":"I BBA","mentorId":"13","dropped":false},{"id":"327","name":"MADHUSHREE H","rollNo":"25BBA5026","combination":"","class":"I BBA","mentorId":"13","dropped":false},{"id":"328","name":"MALATHI BAI S","rollNo":"25BBA5014","combination":"","class":"I BBA","mentorId":"13","dropped":false},{"id":"329","name":"N YADUSHREE","rollNo":"25BBA5002","combination":"","class":"I BBA","mentorId":"13","dropped":false},{"id":"330","name":"NISARGA M","rollNo":"25BBA5018","combination":"","class":"I BBA","mentorId":"13","dropped":false},{"id":"331","name":"PREETHI","rollNo":"25BBA5016","combination":"","class":"I BBA","mentorId":"13","dropped":false},{"id":"332","name":"PREETHI S","rollNo":"25BBA5007","combination":"","class":"I BBA","mentorId":"13","dropped":false},{"id":"333","name":"PUNEETH Y","rollNo":"25BBA5013","combination":"","class":"I BBA","mentorId":"13","dropped":false},{"id":"334","name":"S K MEHEDI HASAN","rollNo":"25BBA5022","combination":"","class":"I BBA","mentorId":"13","dropped":false},{"id":"335","name":"SANJAY V","rollNo":"25BBA5021","combination":"","class":"I BBA","mentorId":"13","dropped":false},{"id":"336","name":"SHREYAS G","rollNo":"25BBA5008","combination":"","class":"I BBA","mentorId":"13","dropped":false},{"id":"337","name":"SOUBHIK KUMAR SINGH","rollNo":"25BBA5024","combination":"","class":"I BBA","mentorId":"13","dropped":false},{"id":"338","name":"SUNIL KUMAR P","rollNo":"25BBA5015","combination":"","class":"I BBA","mentorId":"13","dropped":false},{"id":"339","name":"SURAJ V S","rollNo":"25BBA5003","combination":"","class":"I BBA","mentorId":"13","dropped":false},{"id":"340","name":"UDAY NAYAKA M","rollNo":"25BBA5010","combination":"","class":"I BBA","mentorId":"13","dropped":false},{"id":"341","name":"VARUN NASHIPUDI","rollNo":"25BBA5009","combination":"","class":"I BBA","mentorId":"13","dropped":false},{"id":"342","name":"ADITYA SURESH MANTUR","rollNo":"","combination":"","class":"II BBA","mentorId":"14","dropped":false},{"id":"343","name":"ARBAZ KARIGAR","rollNo":"","combination":"","class":"II BBA","mentorId":"14","dropped":false},{"id":"344","name":"CHIRAG D","rollNo":"","combination":"","class":"II BBA","mentorId":"14","dropped":false},{"id":"345","name":"GEETASHRI","rollNo":"","combination":"","class":"II BBA","mentorId":"14","dropped":false},{"id":"346","name":"H MUDASIR","rollNo":"","combination":"","class":"II BBA","mentorId":"14","dropped":false},{"id":"347","name":"MITHUN BA","rollNo":"","combination":"","class":"II BBA","mentorId":"14","dropped":false},{"id":"348","name":"NITHIN UPADHAYA","rollNo":"","combination":"","class":"II BBA","mentorId":"14","dropped":false},{"id":"349","name":"PALAK KUMARI","rollNo":"","combination":"","class":"II BBA","mentorId":"14","dropped":false},{"id":"350","name":"PRAKHYAN N","rollNo":"","combination":"","class":"II BBA","mentorId":"14","dropped":false},{"id":"351","name":"RAHUL GOWDA K","rollNo":"","combination":"","class":"II BBA","mentorId":"14","dropped":false},{"id":"352","name":"SHAIKH SAHIL SALIM","rollNo":"","combination":"","class":"II BBA","mentorId":"14","dropped":false},{"id":"353","name":"SHARATHKUMAR V","rollNo":"","combination":"","class":"II BBA","mentorId":"14","dropped":false},{"id":"354","name":"SHREYAS D M","rollNo":"","combination":"","class":"II BBA","mentorId":"14","dropped":false},{"id":"355","name":"SONIYA P","rollNo":"","combination":"","class":"II BBA","mentorId":"14","dropped":false},{"id":"356","name":"SUNIL N L","rollNo":"","combination":"","class":"II BBA","mentorId":"14","dropped":false},{"id":"357","name":"UDHAY G","rollNo":"","combination":"","class":"II BBA","mentorId":"14","dropped":false},{"id":"358","name":"VARUN RAJ R","rollNo":"","combination":"","class":"II BBA","mentorId":"14","dropped":false},{"id":"359","name":"YASHASWINI J M","rollNo":"","combination":"","class":"II BBA","mentorId":"14","dropped":false},{"id":"360","name":"YASHASWINI R","rollNo":"","combination":"","class":"II BBA","mentorId":"14","dropped":false},{"id":"361","name":"ZABIULLA","rollNo":"","combination":"","class":"II BBA","mentorId":"14","dropped":false},{"id":"362","name":"JAYANTA","rollNo":"","combination":"","class":"II BBA","mentorId":"14","dropped":false},{"id":"363","name":"MADESH","rollNo":"","combination":"","class":"II BBA","mentorId":"14","dropped":false},{"id":"364","name":"AISHWARYA N","rollNo":"","combination":"","class":"III BBA","mentorId":"15","dropped":false},{"id":"365","name":"BHAVESH B","rollNo":"","combination":"","class":"III BBA","mentorId":"15","dropped":false},{"id":"366","name":"CHAITANYA LAKSHMI G A","rollNo":"","combination":"","class":"III BBA","mentorId":"15","dropped":false},{"id":"367","name":"DARSHAN GOWDA R","rollNo":"","combination":"","class":"III BBA","mentorId":"15","dropped":false},{"id":"368","name":"DISHA G P","rollNo":"","combination":"","class":"III BBA","mentorId":"15","dropped":false},{"id":"369","name":"DURGA SEERVI","rollNo":"","combination":"","class":"III BBA","mentorId":"15","dropped":false},{"id":"370","name":"ESHA G","rollNo":"","combination":"","class":"III BBA","mentorId":"15","dropped":false},{"id":"371","name":"GOWTHAMI M","rollNo":"","combination":"","class":"III BBA","mentorId":"15","dropped":false},{"id":"372","name":"HEMANTH NAIDU K V","rollNo":"","combination":"","class":"III BBA","mentorId":"15","dropped":false},{"id":"373","name":"JASMEET SINGH","rollNo":"","combination":"","class":"III BBA","mentorId":"15","dropped":false},{"id":"374","name":"LALITHA DEVI K","rollNo":"","combination":"","class":"III BBA","mentorId":"15","dropped":false},{"id":"375","name":"LIKHITHA N M","rollNo":"","combination":"","class":"III BBA","mentorId":"15","dropped":false},{"id":"376","name":"MADIHA SAMAN","rollNo":"","combination":"","class":"III BBA","mentorId":"15","dropped":false},{"id":"377","name":"MANASA D","rollNo":"","combination":"","class":"III BBA","mentorId":"15","dropped":false},{"id":"378","name":"MANASA R","rollNo":"","combination":"","class":"III BBA","mentorId":"15","dropped":false},{"id":"379","name":"MIZBA FATHIMA","rollNo":"","combination":"","class":"III BBA","mentorId":"15","dropped":false},{"id":"380","name":"MOHAMMED ROSHAN A","rollNo":"","combination":"","class":"III BBA","mentorId":"15","dropped":false},{"id":"381","name":"NARESH N","rollNo":"","combination":"","class":"III BBA","mentorId":"15","dropped":false},{"id":"382","name":"NIKHIL A","rollNo":"","combination":"","class":"III BBA","mentorId":"15","dropped":false},{"id":"383","name":"NIRMAL KUMAR M","rollNo":"","combination":"","class":"III BBA","mentorId":"15","dropped":false},{"id":"384","name":"PRAJWAL M U","rollNo":"","combination":"","class":"III BBA","mentorId":"15","dropped":false},{"id":"385","name":"PRUTHVI REDDY S V","rollNo":"","combination":"","class":"III BBA","mentorId":"15","dropped":false},{"id":"386","name":"RITHIK PASWAN","rollNo":"","combination":"","class":"III BBA","mentorId":"15","dropped":false},{"id":"387","name":"SAI LOHITH V N","rollNo":"","combination":"","class":"III BBA","mentorId":"15","dropped":false},{"id":"388","name":"SANJANA VINAYAK RAIKAR","rollNo":"","combination":"","class":"III BBA","mentorId":"15","dropped":false},{"id":"389","name":"SNEHA A","rollNo":"","combination":"","class":"III BBA","mentorId":"15","dropped":false},{"id":"390","name":"TEJASWINI A","rollNo":"","combination":"","class":"III BBA","mentorId":"15","dropped":false},{"id":"391","name":"TRISHA C","rollNo":"","combination":"","class":"III BBA","mentorId":"15","dropped":false},{"id":"392","name":"VARSHITHA G N","rollNo":"","combination":"","class":"III BBA","mentorId":"15","dropped":false},{"id":"393","name":"VERONICA M","rollNo":"","combination":"","class":"III BBA","mentorId":"15","dropped":false},{"id":"394","name":"YATHIN KALAIAH T P","rollNo":"","combination":"","class":"III BBA","mentorId":"15","dropped":false},{"id":"395","name":"AATHMA S","rollNo":"25BCO5012","combination":"","class":"I BCom","mentorId":"16","dropped":false},{"id":"396","name":"AKSHAYA P","rollNo":"25BCO5019","combination":"","class":"I BCom","mentorId":"16","dropped":false},{"id":"397","name":"ASMIYA MUSARATH","rollNo":"25BCO5009","combination":"","class":"I BCom","mentorId":"16","dropped":false},{"id":"398","name":"DHEERAJ M","rollNo":"25BCO5046","combination":"","class":"I BCom","mentorId":"16","dropped":false},{"id":"399","name":"DIVYA M","rollNo":"25BCO5006","combination":"","class":"I BCom","mentorId":"16","dropped":false},{"id":"400","name":"DIVYA SHREE R","rollNo":"25BCO5052","combination":"","class":"I BCom","mentorId":"16","dropped":false},{"id":"401","name":"GOWTHAM A R","rollNo":"25BCO5024","combination":"","class":"I BCom","mentorId":"16","dropped":false},{"id":"402","name":"HARSHITH M V","rollNo":"25BC05018","combination":"","class":"I BCom","mentorId":"16","dropped":false},{"id":"403","name":"HRUTHIK KUMAR B N","rollNo":"25BCO5055","combination":"","class":"I BCom","mentorId":"16","dropped":false},{"id":"404","name":"JHANAVI P","rollNo":"25BCO5040","combination":"","class":"I BCom","mentorId":"16","dropped":false},{"id":"405","name":"KALYANI S","rollNo":"25BCO5010","combination":"","class":"I BCom","mentorId":"16","dropped":false},{"id":"406","name":"KEERTHANA N","rollNo":"25BCO5007","combination":"","class":"I BCom","mentorId":"16","dropped":false},{"id":"407","name":"KUMARA N","rollNo":"25BCO5048","combination":"","class":"I BCom","mentorId":"16","dropped":false},{"id":"408","name":"LIKHITHA G","rollNo":"25BCO5056","combination":"","class":"I BCom","mentorId":"16","dropped":false},{"id":"409","name":"MADAN B S","rollNo":"25BCO5016","combination":"","class":"I BCom","mentorId":"16","dropped":false},{"id":"410","name":"MADAN H P","rollNo":"25BCO5045","combination":"","class":"I BCom","mentorId":"16","dropped":false},{"id":"411","name":"MANASA N","rollNo":"25BCO5028","combination":"","class":"I BCom","mentorId":"16","dropped":false},{"id":"412","name":"MANOJ S","rollNo":"25BCO5047","combination":"","class":"I BCom","mentorId":"16","dropped":false},{"id":"413","name":"MANOJ GOWDA K","rollNo":"25BCO5015","combination":"","class":"I BCom","mentorId":"16","dropped":false},{"id":"414","name":"MOHAMMAD USMAN","rollNo":"25BCO5050","combination":"","class":"I BCom","mentorId":"16","dropped":false},{"id":"415","name":"MONIKA Y R","rollNo":"25BCO5032","combination":"","class":"I BCom","mentorId":"16","dropped":false},{"id":"416","name":"NANDISH B","rollNo":"25BCO5023","combination":"","class":"I BCom","mentorId":"16","dropped":false},{"id":"417","name":"NIKHIL C","rollNo":"25BCO5051","combination":"","class":"I BCom","mentorId":"16","dropped":false},{"id":"418","name":"NIKHIL GOWDA H R","rollNo":"25BCO5033","combination":"","class":"I BCom","mentorId":"16","dropped":false},{"id":"419","name":"PALLAVI H G","rollNo":"25BCO5017","combination":"","class":"I BCom","mentorId":"16","dropped":false},{"id":"420","name":"PAVAN R","rollNo":"25BCO5042","combination":"","class":"I BCom","mentorId":"16","dropped":false},{"id":"421","name":"POOJA S","rollNo":"25BCO5001","combination":"","class":"I BCom","mentorId":"16","dropped":false},{"id":"422","name":"PRAGATHI D R","rollNo":"25BC05021","combination":"","class":"I BCom","mentorId":"16","dropped":false},{"id":"423","name":"PRAJWAL K G","rollNo":"25BCO5037","combination":"","class":"I BCom","mentorId":"16","dropped":false},{"id":"424","name":"PRAJWAL R","rollNo":"25BCO5057","combination":"","class":"I BCom","mentorId":"16","dropped":false},{"id":"425","name":"PRIYA S","rollNo":"25BC05022","combination":"","class":"I BCom","mentorId":"17","dropped":false},{"id":"426","name":"PRIYADARSHINI S","rollNo":"25BCO5039","combination":"","class":"I BCom","mentorId":"17","dropped":false},{"id":"427","name":"PUNITH G","rollNo":"25BCO5030","combination":"","class":"I BCom","mentorId":"17","dropped":false},{"id":"428","name":"RAJATH S","rollNo":"25BCO5058","combination":"","class":"I BCom","mentorId":"17","dropped":false},{"id":"429","name":"RAJESH A H","rollNo":"25BCO5036","combination":"","class":"I BCom","mentorId":"17","dropped":false},{"id":"430","name":"RINKY SHIRLEY Y","rollNo":"25BCO5027","combination":"","class":"I BCom","mentorId":"17","dropped":false},{"id":"431","name":"RITHICK RAJU C V","rollNo":"25BCO5031","combination":"","class":"I BCom","mentorId":"17","dropped":false},{"id":"432","name":"SAGAR S","rollNo":"25BCO5014","combination":"","class":"I BCom","mentorId":"17","dropped":false},{"id":"433","name":"SAHANA S","rollNo":"25BCO5003","combination":"","class":"I BCom","mentorId":"17","dropped":false},{"id":"434","name":"SAKSHI KUMARI A","rollNo":"25BCO5034","combination":"","class":"I BCom","mentorId":"17","dropped":false},{"id":"435","name":"SHALINI B","rollNo":"25BC05008","combination":"","class":"I BCom","mentorId":"17","dropped":false},{"id":"436","name":"SHARAN M","rollNo":"25BCO5043","combination":"","class":"I BCom","mentorId":"17","dropped":false},{"id":"437","name":"SHRUTHI R","rollNo":"25BCO5011","combination":"","class":"I BCom","mentorId":"17","dropped":false},{"id":"438","name":"SNEHA A","rollNo":"25BCO5054","combination":"","class":"I BCom","mentorId":"17","dropped":false},{"id":"439","name":"SOUNDHAR J","rollNo":"25BCO5053","combination":"","class":"I BCom","mentorId":"17","dropped":false},{"id":"440","name":"SUMAN PANJA","rollNo":"25BCO5013","combination":"","class":"I BCom","mentorId":"17","dropped":false},{"id":"441","name":"SWAMY R","rollNo":"25BCO5038","combination":"","class":"I BCom","mentorId":"17","dropped":false},{"id":"442","name":"TARUN R","rollNo":"25BCO5035","combination":"","class":"I BCom","mentorId":"17","dropped":false},{"id":"443","name":"TUSHAR JAIN P","rollNo":"25BCO5029","combination":"","class":"I BCom","mentorId":"17","dropped":false},{"id":"444","name":"USHA","rollNo":"25BCO5025","combination":"","class":"I BCom","mentorId":"17","dropped":false},{"id":"445","name":"VARUN S","rollNo":"25BCO5005","combination":"","class":"I BCom","mentorId":"17","dropped":false},{"id":"446","name":"VIDYASHREE R","rollNo":"25BCO5026","combination":"","class":"I BCom","mentorId":"17","dropped":false},{"id":"447","name":"YASHWANTH D","rollNo":"25BCO5041","combination":"","class":"I BCom","mentorId":"17","dropped":false},{"id":"448","name":"ADARSH R","rollNo":"","combination":"","class":"II BCom","mentorId":"18","dropped":false},{"id":"449","name":"AISHWARYA A","rollNo":"","combination":"","class":"II BCom","mentorId":"18","dropped":false},{"id":"450","name":"AMAN KUMAR","rollNo":"","combination":"","class":"II BCom","mentorId":"18","dropped":false},{"id":"451","name":"ANJI M","rollNo":"","combination":"","class":"II BCom","mentorId":"18","dropped":false},{"id":"452","name":"ANKITHA S","rollNo":"","combination":"","class":"II BCom","mentorId":"18","dropped":false},{"id":"453","name":"ASHA N","rollNo":"","combination":"","class":"II BCom","mentorId":"18","dropped":false},{"id":"454","name":"BHARGAVI B","rollNo":"","combination":"","class":"II BCom","mentorId":"18","dropped":false},{"id":"455","name":"BHAVANA N","rollNo":"","combination":"","class":"II BCom","mentorId":"18","dropped":false},{"id":"456","name":"BHUVAN B","rollNo":"","combination":"","class":"II BCom","mentorId":"18","dropped":false},{"id":"457","name":"BHYRAVI M S","rollNo":"","combination":"","class":"II BCom","mentorId":"18","dropped":false},{"id":"458","name":"CHANDU GOWDA R","rollNo":"","combination":"","class":"II BCom","mentorId":"18","dropped":false},{"id":"459","name":"CHARAN V","rollNo":"","combination":"","class":"II BCom","mentorId":"18","dropped":false},{"id":"460","name":"CHIDANANDA K S","rollNo":"","combination":"","class":"II BCom","mentorId":"18","dropped":false},{"id":"461","name":"FIRDOOS","rollNo":"","combination":"","class":"II BCom","mentorId":"18","dropped":false},{"id":"462","name":"GUNAVATHI","rollNo":"","combination":"","class":"II BCom","mentorId":"18","dropped":false},{"id":"463","name":"HARSHA T S","rollNo":"","combination":"","class":"II BCom","mentorId":"18","dropped":false},{"id":"464","name":"HARSHAN V NAIK","rollNo":"","combination":"","class":"II BCom","mentorId":"18","dropped":false},{"id":"465","name":"HEMAVARNI D","rollNo":"","combination":"","class":"II BCom","mentorId":"18","dropped":false},{"id":"466","name":"HETVI K AJMERA","rollNo":"","combination":"","class":"II BCom","mentorId":"18","dropped":false},{"id":"467","name":"J CHARAN VIGNESH REDDY","rollNo":"","combination":"","class":"II BCom","mentorId":"18","dropped":false},{"id":"468","name":"KEERTHANA L","rollNo":"","combination":"","class":"II BCom","mentorId":"18","dropped":false},{"id":"469","name":"KISHOR K R","rollNo":"","combination":"","class":"II BCom","mentorId":"18","dropped":false},{"id":"470","name":"LEHANSH DAVE","rollNo":"","combination":"","class":"II BCom","mentorId":"18","dropped":false},{"id":"471","name":"MANISH K","rollNo":"","combination":"","class":"II BCom","mentorId":"18","dropped":false},{"id":"472","name":"MANOJ B","rollNo":"","combination":"","class":"II BCom","mentorId":"18","dropped":false},{"id":"473","name":"MONISHA L","rollNo":"","combination":"","class":"II BCom","mentorId":"19","dropped":false},{"id":"474","name":"NADHIYA M","rollNo":"","combination":"","class":"II BCom","mentorId":"19","dropped":false},{"id":"475","name":"NANDITHA E K","rollNo":"","combination":"","class":"II BCom","mentorId":"19","dropped":false},{"id":"476","name":"PALLAVI","rollNo":"","combination":"","class":"II BCom","mentorId":"19","dropped":false},{"id":"477","name":"PAVITHRA S","rollNo":"","combination":"","class":"II BCom","mentorId":"19","dropped":false},{"id":"478","name":"SADHANA K","rollNo":"","combination":"","class":"II BCom","mentorId":"19","dropped":false},{"id":"479","name":"SADIYA BANU","rollNo":"","combination":"","class":"II BCom","mentorId":"19","dropped":false},{"id":"480","name":"SANJAY G S","rollNo":"","combination":"","class":"II BCom","mentorId":"19","dropped":false},{"id":"481","name":"SATHISH P","rollNo":"","combination":"","class":"II BCom","mentorId":"19","dropped":false},{"id":"482","name":"SHARUN K P","rollNo":"","combination":"","class":"II BCom","mentorId":"19","dropped":false},{"id":"483","name":"SHASHANK KUMAR A","rollNo":"","combination":"","class":"II BCom","mentorId":"19","dropped":false},{"id":"484","name":"SHREYAS R","rollNo":"","combination":"","class":"II BCom","mentorId":"19","dropped":false},{"id":"485","name":"SIDDHARTH R NAYAK","rollNo":"","combination":"","class":"II BCom","mentorId":"19","dropped":false},{"id":"486","name":"SOWMYA N","rollNo":"","combination":"","class":"II BCom","mentorId":"19","dropped":false},{"id":"487","name":"SOWMYA V GOWDA","rollNo":"","combination":"","class":"II BCom","mentorId":"19","dropped":false},{"id":"488","name":"SRIDHAR GOWDA R","rollNo":"","combination":"","class":"II BCom","mentorId":"19","dropped":false},{"id":"489","name":"SRIDHAR J","rollNo":"","combination":"","class":"II BCom","mentorId":"19","dropped":false},{"id":"490","name":"SUMUKHA G BHAT","rollNo":"","combination":"","class":"II BCom","mentorId":"19","dropped":false},{"id":"491","name":"SUNIDHI P","rollNo":"","combination":"","class":"II BCom","mentorId":"19","dropped":false},{"id":"492","name":"SUPRITHA P ACHARYA","rollNo":"","combination":"","class":"II BCom","mentorId":"19","dropped":false},{"id":"493","name":"TEJAS M","rollNo":"","combination":"","class":"II BCom","mentorId":"19","dropped":false},{"id":"494","name":"TEJASHWINI K S","rollNo":"","combination":"","class":"II BCom","mentorId":"19","dropped":false},{"id":"495","name":"TEJASWINI M","rollNo":"","combination":"","class":"II BCom","mentorId":"19","dropped":false},{"id":"496","name":"TRISHA P","rollNo":"","combination":"","class":"II BCom","mentorId":"19","dropped":false},{"id":"497","name":"VEDASHREE B S","rollNo":"","combination":"","class":"II BCom","mentorId":"19","dropped":false},{"id":"498","name":"YOGESH S","rollNo":"","combination":"","class":"II BCom","mentorId":"19","dropped":false},{"id":"499","name":"ABHISHEK","rollNo":"","combination":"","class":"III BCom","mentorId":"20","dropped":false},{"id":"500","name":"ADITHYA PARASHARA M C","rollNo":"","combination":"","class":"III BCom","mentorId":"20","dropped":false},{"id":"501","name":"ADITHYA S","rollNo":"","combination":"","class":"III BCom","mentorId":"20","dropped":false},{"id":"502","name":"AISHWARYA P","rollNo":"","combination":"","class":"III BCom","mentorId":"20","dropped":false},{"id":"503","name":"AMRUTHA K N","rollNo":"","combination":"","class":"III BCom","mentorId":"20","dropped":false},{"id":"504","name":"ANIL SUTHAR C","rollNo":"","combination":"","class":"III BCom","mentorId":"20","dropped":false},{"id":"505","name":"ANJALI G","rollNo":"","combination":"","class":"III BCom","mentorId":"20","dropped":false},{"id":"506","name":"ANUSHA R","rollNo":"","combination":"","class":"III BCom","mentorId":"20","dropped":false},{"id":"507","name":"ARPITH S GOWDA","rollNo":"","combination":"","class":"III BCom","mentorId":"20","dropped":false},{"id":"508","name":"ASHUTOSH JENA","rollNo":"","combination":"","class":"III BCom","mentorId":"20","dropped":false},{"id":"509","name":"B GOUTAM KUMAR","rollNo":"","combination":"","class":"III BCom","mentorId":"20","dropped":false},{"id":"510","name":"B R PALLAVI","rollNo":"","combination":"","class":"III BCom","mentorId":"20","dropped":false},{"id":"511","name":"BENAKESH GOWDA R","rollNo":"","combination":"","class":"III BCom","mentorId":"20","dropped":false},{"id":"512","name":"BHAVANA L","rollNo":"","combination":"","class":"III BCom","mentorId":"20","dropped":false},{"id":"513","name":"BHAVANA M","rollNo":"","combination":"","class":"III BCom","mentorId":"20","dropped":false},{"id":"514","name":"CHAITHRA N","rollNo":"","combination":"","class":"III BCom","mentorId":"20","dropped":false},{"id":"515","name":"CHANDANA H","rollNo":"","combination":"","class":"III BCom","mentorId":"20","dropped":false},{"id":"516","name":"CHARAN R","rollNo":"","combination":"","class":"III BCom","mentorId":"20","dropped":false},{"id":"517","name":"DARSHAN B S","rollNo":"","combination":"","class":"III BCom","mentorId":"20","dropped":false},{"id":"518","name":"DEVIKA A","rollNo":"","combination":"","class":"III BCom","mentorId":"20","dropped":false},{"id":"519","name":"DHANRAJ SUTHAR C","rollNo":"","combination":"","class":"III BCom","mentorId":"20","dropped":false},{"id":"520","name":"DHANUSH A","rollNo":"","combination":"","class":"III BCom","mentorId":"20","dropped":false},{"id":"521","name":"DIVYASHREE S","rollNo":"","combination":"","class":"III BCom","mentorId":"20","dropped":false},{"id":"522","name":"E SHREYAS","rollNo":"","combination":"","class":"III BCom","mentorId":"20","dropped":false},{"id":"523","name":"HARINI M","rollNo":"","combination":"","class":"III BCom","mentorId":"20","dropped":false},{"id":"524","name":"HARSHITHA","rollNo":"","combination":"","class":"III BCom","mentorId":"20","dropped":false},{"id":"525","name":"HARSHITHA M P","rollNo":"","combination":"","class":"III BCom","mentorId":"20","dropped":false},{"id":"526","name":"HEMANTH RAO K R","rollNo":"","combination":"","class":"III BCom","mentorId":"20","dropped":false},{"id":"527","name":"HITANSH BANSAL","rollNo":"","combination":"","class":"III BCom","mentorId":"20","dropped":false},{"id":"528","name":"INCHARA M","rollNo":"","combination":"","class":"III BCom","mentorId":"20","dropped":false},{"id":"529","name":"INIYAA S","rollNo":"","combination":"","class":"III BCom","mentorId":"20","dropped":false},{"id":"530","name":"KALYANI HANSDA","rollNo":"","combination":"","class":"III BCom","mentorId":"20","dropped":false},{"id":"531","name":"KARTHIK G","rollNo":"","combination":"","class":"III BCom","mentorId":"20","dropped":false},{"id":"532","name":"KAVANA R","rollNo":"","combination":"","class":"III BCom","mentorId":"20","dropped":false},{"id":"533","name":"KEERTHI DAYANIDHI","rollNo":"","combination":"","class":"III BCom","mentorId":"20","dropped":false},{"id":"534","name":"KRUPA M","rollNo":"","combination":"","class":"III BCom","mentorId":"20","dropped":false},{"id":"535","name":"KULDEEP SUTHAR P","rollNo":"","combination":"","class":"III BCom","mentorId":"20","dropped":false},{"id":"536","name":"LIKITH G","rollNo":"","combination":"","class":"III BCom","mentorId":"20","dropped":false},{"id":"537","name":"MALLIKA BEGAUM","rollNo":"","combination":"","class":"III BCom","mentorId":"20","dropped":false},{"id":"538","name":"MANASVI G","rollNo":"","combination":"","class":"III BCom","mentorId":"21","dropped":false},{"id":"539","name":"MANISHA KANWAR","rollNo":"","combination":"","class":"III BCom","mentorId":"21","dropped":false},{"id":"540","name":"MANJUNATH V","rollNo":"","combination":"","class":"III BCom","mentorId":"21","dropped":false},{"id":"541","name":"MANOHAR J","rollNo":"","combination":"","class":"III BCom","mentorId":"21","dropped":false},{"id":"542","name":"MANOJ N","rollNo":"","combination":"","class":"III BCom","mentorId":"21","dropped":false},{"id":"543","name":"MEGHANA H T","rollNo":"","combination":"","class":"III BCom","mentorId":"21","dropped":false},{"id":"544","name":"MOHAMMED ALEEMUDDIN","rollNo":"","combination":"","class":"III BCom","mentorId":"21","dropped":false},{"id":"545","name":"MOHAMMED MUHEED","rollNo":"","combination":"","class":"III BCom","mentorId":"21","dropped":false},{"id":"546","name":"MOHAN S","rollNo":"","combination":"","class":"III BCom","mentorId":"21","dropped":false},{"id":"547","name":"MOKSHITH C","rollNo":"","combination":"","class":"III BCom","mentorId":"21","dropped":false},{"id":"548","name":"MUSKAN J","rollNo":"","combination":"","class":"III BCom","mentorId":"21","dropped":false},{"id":"549","name":"NANDA KUMAR P","rollNo":"","combination":"","class":"III BCom","mentorId":"21","dropped":false},{"id":"550","name":"NAYANA V","rollNo":"","combination":"","class":"III BCom","mentorId":"21","dropped":false},{"id":"551","name":"PALLAVI P","rollNo":"","combination":"","class":"III BCom","mentorId":"21","dropped":false},{"id":"552","name":"PAVITHRA B","rollNo":"","combination":"","class":"III BCom","mentorId":"21","dropped":false},{"id":"553","name":"PRAJWAL P","rollNo":"","combination":"","class":"III BCom","mentorId":"21","dropped":false},{"id":"554","name":"PREETHI U","rollNo":"","combination":"","class":"III BCom","mentorId":"21","dropped":false},{"id":"555","name":"PUNITH PUJARI S","rollNo":"","combination":"","class":"III BCom","mentorId":"21","dropped":false},{"id":"556","name":"PUNITH V","rollNo":"","combination":"","class":"III BCom","mentorId":"21","dropped":false},{"id":"557","name":"RAJESH R","rollNo":"","combination":"","class":"III BCom","mentorId":"21","dropped":false},{"id":"558","name":"RAJESHWARI G S","rollNo":"","combination":"","class":"III BCom","mentorId":"21","dropped":false},{"id":"559","name":"RAKESH P","rollNo":"","combination":"","class":"III BCom","mentorId":"21","dropped":false},{"id":"560","name":"RAKSHITH GOWDA N S","rollNo":"","combination":"","class":"III BCom","mentorId":"21","dropped":false},{"id":"561","name":"ROHITH G","rollNo":"","combination":"","class":"III BCom","mentorId":"21","dropped":false},{"id":"562","name":"ROHITH R","rollNo":"","combination":"","class":"III BCom","mentorId":"21","dropped":false},{"id":"563","name":"SANJITH NARAYANAN R V","rollNo":"","combination":"","class":"III BCom","mentorId":"21","dropped":false},{"id":"564","name":"SHREE LATHA V","rollNo":"","combination":"","class":"III BCom","mentorId":"21","dropped":false},{"id":"565","name":"SHWETHA B","rollNo":"","combination":"","class":"III BCom","mentorId":"21","dropped":false},{"id":"566","name":"SONIKA","rollNo":"","combination":"","class":"III BCom","mentorId":"21","dropped":false},{"id":"567","name":"SUMAN A","rollNo":"","combination":"","class":"III BCom","mentorId":"21","dropped":false},{"id":"568","name":"SURAJ KHATI A","rollNo":"","combination":"","class":"III BCom","mentorId":"21","dropped":false},{"id":"569","name":"TAMANNA M SHANU","rollNo":"","combination":"","class":"III BCom","mentorId":"21","dropped":false},{"id":"570","name":"THANUSH S","rollNo":"","combination":"","class":"III BCom","mentorId":"21","dropped":false},{"id":"571","name":"THANUSHA C","rollNo":"","combination":"","class":"III BCom","mentorId":"21","dropped":false},{"id":"572","name":"THIMMESH G","rollNo":"","combination":"","class":"III BCom","mentorId":"21","dropped":false},{"id":"573","name":"TISHA JOSHI","rollNo":"","combination":"","class":"III BCom","mentorId":"21","dropped":false},{"id":"574","name":"VANDANA R","rollNo":"","combination":"","class":"III BCom","mentorId":"21","dropped":false},{"id":"575","name":"VIDYA N","rollNo":"","combination":"","class":"III BCom","mentorId":"21","dropped":false},{"id":"576","name":"VINOD KUMAR M","rollNo":"","combination":"","class":"III BCom","mentorId":"21","dropped":false}];
+
+// ─── Profile schema ────────────────────────────────────────────────────────────
+const PROFILE_SCHEMA = {
+  personal:   { label: "Personal info",        icon: "👤", fields: { dateOfBirth: "Date of birth", phone: "Phone number", email: "Email address", address: "Home address", emergencyContact: "Emergency contact" } },
+  academic:   { label: "Academic info",         icon: "📚", fields: { cgpa: "CGPA / GPA", attendance: "Attendance %", backlogs: "Backlogs / arrears" } },
+  family:     { label: "Family background",     icon: "🏡", fields: { fathersInfo: "Father's name & occupation", mothersInfo: "Mother's name & occupation", hometown: "Hometown", firstGenStudent: "First-gen college student?" } },
+  skills:     { label: "Skills & interests",    icon: "⚡", fields: { technicalSkills: "Technical skills", softSkills: "Soft skills", hobbies: "Hobbies & interests", languages: "Languages known" } },
+  activities: { label: "Activities",            icon: "🏆", fields: { clubs: "Clubs & committees", achievements: "Awards & achievements", certifications: "Certifications" } },
+  career:     { label: "Career aspirations",    icon: "🚀", fields: { careerGoal: "Career goal", domainInterest: "Domain of interest", targetAfterGrad: "Target companies or universities" } }
+};
+const ALL_FIELDS = Object.entries(PROFILE_SCHEMA).reduce((acc, [cat, { fields }]) => {
+  Object.entries(fields).forEach(([k, label]) => { acc[k] = { label, category: cat }; }); return acc;
+}, {});
+const TOTAL_FIELDS = Object.keys(ALL_FIELDS).length;
+
+// ─── Helpers ───────────────────────────────────────────────────────────────────
+const store = {
+  async get(k) { try { const r = await window.storage.get(k); return r ? JSON.parse(r.value) : null; } catch { return null; } },
+  async set(k, v) { try { await window.storage.set(k, JSON.stringify(v)); } catch {} }
+};
+const ini = (n = "") => n.split(" ").filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join("") || "?";
+const pct = (data = {}) => { const f = Object.keys(ALL_FIELDS).filter(k => data[k]).length; return { filled: f, total: TOTAL_FIELDS, pct: Math.round(f / TOTAL_FIELDS * 100) }; };
+const fmt = iso => iso ? new Date(iso).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "—";
+
+// Dept colour palette
+const DEPT_COLORS = { "Botany": ["#EAF3DE","#3B6D11"], "Journalism": ["#E6F1FB","#185FA5"], "English": ["#FAEEDA","#854F0B"], "Computer Application": ["#EEEDFE","#533AB7"], "Kannada": ["#FBEAF0","#993556"], "Commerce & Management": ["#E1F5EE","#0F6E56"] };
+const dc = dept => DEPT_COLORS[dept] || ["#F1EFE8","#5F5E5A"];
+
+const S = {
+  card: { background: "var(--color-background-primary)", border: "0.5px solid var(--color-border-tertiary)", borderRadius: "var(--border-radius-lg)", padding: "1rem 1.25rem" },
+  inp: { width: "100%", boxSizing: "border-box", padding: "7px 11px", borderRadius: "var(--border-radius-md)", border: "0.5px solid var(--color-border-secondary)", background: "var(--color-background-primary)", color: "var(--color-text-primary)", fontSize: 13 },
+  btn: { padding: "7px 14px", borderRadius: "var(--border-radius-md)", border: "0.5px solid var(--color-border-secondary)", background: "transparent", color: "var(--color-text-secondary)", cursor: "pointer", fontSize: 12 },
+  btnBlue: { padding: "7px 16px", borderRadius: "var(--border-radius-md)", border: "none", background: "#185FA5", color: "#E6F1FB", cursor: "pointer", fontSize: 13, fontWeight: 500 },
+};
+
+// ─── Root App ──────────────────────────────────────────────────────────────────
+export default function App() {
+  const [unit, setUnit] = useState(1);
+  const [mentors, setMentors] = useState([]);
+  const [students, setStudents] = useState([]);
+  const [profiles, setProfiles] = useState({});
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const m = await store.get("mt-mentors5");
+      const s = await store.get("mt-students5");
+      const p = await store.get("mt-profiles5");
+      if (m) setMentors(m); else { setMentors(SEED_MENTORS); await store.set("mt-mentors5", SEED_MENTORS); }
+      if (s) setStudents(s); else { setStudents(SEED_STUDENTS); await store.set("mt-students5", SEED_STUDENTS); }
+      if (p) setProfiles(p);
+      setReady(true);
+    })();
+  }, []);
+
+  const saveMentors  = async d => { setMentors(d);  await store.set("mt-mentors5", d); };
+  const saveStudents = async d => { setStudents(d); await store.set("mt-students5", d); };
+  const saveProfiles = async d => { setProfiles(d); await store.set("mt-profiles5", d); };
+
+  if (!ready) return <div style={{ display:"flex", alignItems:"center", justifyContent:"center", height:200, color:"var(--color-text-secondary)", fontSize:14 }}>Loading…</div>;
+
+  return (
+    <div style={{ fontFamily:"var(--font-sans)", color:"var(--color-text-primary)" }}>
+      {/* Tab bar */}
+      <div style={{ borderBottom:"0.5px solid var(--color-border-tertiary)", padding:"0 1.5rem", display:"flex", alignItems:"center", gap:2 }}>
+        <span style={{ fontWeight:500, fontSize:14, marginRight:"1rem", color:"var(--color-text-secondary)" }}>MentorTrack</span>
+        {[["Repository","1"],["Profile builder","2"],["Summary","3"]].map(([label, id]) => (
+          <button key={id} onClick={() => setUnit(+id)} style={{ padding:"10px 14px", background:"transparent", border:"none", borderBottom: unit===+id ? "2px solid #185FA5":"2px solid transparent", color: unit===+id ? "#185FA5":"var(--color-text-secondary)", cursor:"pointer", fontSize:13, fontWeight: unit===+id ? 500:400 }}>
+            Unit {id} — {label}
+          </button>
+        ))}
+        <div style={{ marginLeft:"auto", display:"flex", alignItems:"center", gap:6, fontSize:11, color:"#3B6D11" }}>
+          <span style={{ width:7, height:7, borderRadius:"50%", background:"#3B6D11", display:"inline-block" }} />
+          Storage connected · {students.length} students · {mentors.length} mentors
+        </div>
+      </div>
+      <div style={{ padding:"1.25rem 1.5rem" }}>
+        {unit===1 && <Unit1 mentors={mentors} students={students} profiles={profiles} saveMentors={saveMentors} saveStudents={saveStudents} />}
+        {unit===2 && <Unit2 students={students} mentors={mentors} profiles={profiles} saveProfiles={saveProfiles} />}
+        {unit===3 && <Unit3 students={students} mentors={mentors} profiles={profiles} saveProfiles={saveProfiles} />}
+      </div>
+    </div>
+  );
+}
+
+// ─── Unit 1: Repository ────────────────────────────────────────────────────────
+function Unit1({ mentors, students, profiles, saveMentors, saveStudents }) {
+  const [search, setSearch]         = useState("");
+  const [filterMentor, setFilter]   = useState("all");
+  const [filterClass, setFilterCls] = useState("all");
+  const [expanded, setExpanded]     = useState({});
+  const [panel, setPanel]           = useState(null); // "mentor" | "student" | null
+  const [mf, setMf] = useState({ name:"", dept:"", email:"" });
+  const [sf, setSf] = useState({ name:"", rollNo:"", class:"", combination:"", mentorId:"" });
+
+  const dropped = students.filter(s => s.dropped).length;
+  const classes = [...new Set(students.map(s => s.class))].sort();
+
+  const visible = students.filter(s => {
+    const q = search.toLowerCase();
+    return (!q || s.name.toLowerCase().includes(q) || s.rollNo.toLowerCase().includes(q))
+      && (filterMentor === "all" || s.mentorId === filterMentor)
+      && (filterClass  === "all" || s.class === filterClass);
+  });
+
+  const toggleDropped = sid => saveStudents(students.map(s => s.id === sid ? { ...s, dropped: !s.dropped } : s));
+  const removeStudent = sid => saveStudents(students.filter(s => s.id !== sid));
+  const removeMentor  = mid => { saveMentors(mentors.filter(m => m.id !== mid)); saveStudents(students.filter(s => s.mentorId !== mid)); };
+
+  const addMentor = () => {
+    if (!mf.name.trim()) return;
+    saveMentors([...mentors, { id: Date.now().toString(), ...mf }]);
+    setMf({ name:"", dept:"", email:"" }); setPanel(null);
+  };
+  const addStudent = () => {
+    if (!sf.name.trim() || !sf.mentorId) return;
+    saveStudents([...students, { id: Date.now().toString(), ...sf, dropped: false }]);
+    setSf({ name:"", rollNo:"", class:"", combination:"", mentorId:"" }); setPanel(null);
+  };
+
+  const grouped = mentors.map(m => ({ ...m, rows: visible.filter(s => s.mentorId === m.id) }))
+                         .filter(m => filterMentor === "all" ? m.rows.length > 0 : m.id === filterMentor);
+
+  return (
+    <div>
+      {/* Stats */}
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(4,minmax(0,1fr))", gap:"0.6rem", marginBottom:"1.25rem" }}>
+        {[["Mentors", mentors.length,"#185FA5"],["Students", students.length,"#533AB7"],["Active", students.length-dropped,"#3B6D11"],["Dropped out", dropped,"#A32D2D"]].map(([l,v,c]) => (
+          <div key={l} style={{ background:"var(--color-background-secondary)", borderRadius:"var(--border-radius-md)", padding:"0.65rem 1rem" }}>
+            <div style={{ fontSize:11, color:"var(--color-text-tertiary)", marginBottom:3 }}>{l}</div>
+            <div style={{ fontSize:22, fontWeight:500, color:c }}>{v}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Toolbar */}
+      <div style={{ display:"flex", gap:"0.5rem", flexWrap:"wrap", alignItems:"center", marginBottom:"0.9rem" }}>
+        <input style={{ ...S.inp, flex:1, minWidth:160, maxWidth:260 }} placeholder="Search name or roll no…" value={search} onChange={e=>setSearch(e.target.value)} />
+        <select style={{ ...S.inp, maxWidth:180 }} value={filterMentor} onChange={e=>setFilter(e.target.value)}>
+          <option value="all">All mentors</option>
+          {mentors.map(m=><option key={m.id} value={m.id}>{m.name}</option>)}
+        </select>
+        <select style={{ ...S.inp, maxWidth:140 }} value={filterClass} onChange={e=>setFilterCls(e.target.value)}>
+          <option value="all">All classes</option>
+          {classes.map(c=><option key={c} value={c}>{c}</option>)}
+        </select>
+        <button onClick={()=>setPanel(panel==="mentor"?null:"mentor")} style={{ ...S.btn, color: panel==="mentor"?"#185FA5":"var(--color-text-secondary)" }}>+ Add mentor</button>
+        <button onClick={()=>setPanel(panel==="student"?null:"student")} style={{ ...S.btn, color: panel==="student"?"#185FA5":"var(--color-text-secondary)" }}>+ Add student</button>
+      </div>
+
+      {/* Inline add forms */}
+      {panel === "mentor" && (
+        <div style={{ ...S.card, marginBottom:"0.9rem", display:"flex", gap:"0.5rem", flexWrap:"wrap", alignItems:"flex-end" }}>
+          {[["Name *","name","text"],["Department","dept","text"],["Email","email","email"]].map(([ph,k])=>(
+            <div key={k} style={{ flex:"1 1 140px" }}>
+              <div style={{ fontSize:11, color:"var(--color-text-tertiary)", marginBottom:3 }}>{ph}</div>
+              <input style={S.inp} placeholder={ph} value={mf[k]} onChange={e=>setMf({...mf,[k]:e.target.value})} onKeyDown={e=>e.key==="Enter"&&addMentor()} />
+            </div>
+          ))}
+          <div style={{ display:"flex", gap:"0.4rem" }}>
+            <button onClick={addMentor} style={S.btnBlue}>Add</button>
+            <button onClick={()=>setPanel(null)} style={S.btn}>Cancel</button>
+          </div>
+        </div>
+      )}
+      {panel === "student" && (
+        <div style={{ ...S.card, marginBottom:"0.9rem", display:"flex", gap:"0.5rem", flexWrap:"wrap", alignItems:"flex-end" }}>
+          {[["Name *","name"],["Roll no.","rollNo"],["Class","class"],["Combination","combination"]].map(([ph,k])=>(
+            <div key={k} style={{ flex:"1 1 120px" }}>
+              <div style={{ fontSize:11, color:"var(--color-text-tertiary)", marginBottom:3 }}>{ph}</div>
+              <input style={S.inp} placeholder={ph} value={sf[k]} onChange={e=>setSf({...sf,[k]:e.target.value})} />
+            </div>
+          ))}
+          <div style={{ flex:"1 1 160px" }}>
+            <div style={{ fontSize:11, color:"var(--color-text-tertiary)", marginBottom:3 }}>Assign mentor *</div>
+            <select style={S.inp} value={sf.mentorId} onChange={e=>setSf({...sf,mentorId:e.target.value})}>
+              <option value="">Select…</option>
+              {mentors.map(m=><option key={m.id} value={m.id}>{m.name}</option>)}
+            </select>
+          </div>
+          <div style={{ display:"flex", gap:"0.4rem" }}>
+            <button onClick={addStudent} style={S.btnBlue}>Add</button>
+            <button onClick={()=>setPanel(null)} style={S.btn}>Cancel</button>
+          </div>
+        </div>
+      )}
+
+      {/* Legend */}
+      <div style={{ fontSize:12, color:"var(--color-text-tertiary)", marginBottom:"0.6rem", display:"flex", gap:"1rem", alignItems:"center" }}>
+        <span>Showing {visible.length} of {students.length} students across {grouped.length} mentor{grouped.length!==1?"s":""}</span>
+        <span style={{ display:"flex", alignItems:"center", gap:5 }}>
+          <span style={{ width:11, height:11, background:"#FCEBEB", border:"1px solid #F09595", borderRadius:2, display:"inline-block" }} />
+          Dropped out (strikethrough + red tint)
+        </span>
+      </div>
+
+      {/* Collapsible mentor cards */}
+      {grouped.length === 0 && <div style={{ textAlign:"center", padding:"2.5rem 0", color:"var(--color-text-tertiary)", fontSize:14 }}>No results — try adjusting your filters.</div>}
+      <div style={{ display:"flex", flexDirection:"column", gap:"0.4rem" }}>
+        {grouped.map(m => {
+          const [bg, fg] = dc(m.dept);
+          const isOpen = !!expanded[m.id];
+          const activeCount  = m.rows.filter(s=>!s.dropped).length;
+          const droppedCount = m.rows.filter(s=> s.dropped).length;
+          // Profiling stats for this mentor
+          const allMenteeIds   = students.filter(s=>s.mentorId===m.id&&!s.dropped).map(s=>s.id);
+          const profiledCount  = allMenteeIds.filter(id=>profiles[id]&&Object.keys(profiles[id].data||{}).length>0).length;
+          const profPct        = allMenteeIds.length > 0 ? Math.round(profiledCount/allMenteeIds.length*100) : 0;
+          const profBarColor   = profPct===100?"#3B6D11":profPct>=50?"#185FA5":"#854F0B";
+          return (
+            <div key={m.id} style={S.card}>
+              {/* Mentor header row */}
+              <div onClick={()=>setExpanded(e=>({...e,[m.id]:!e[m.id]}))} style={{ display:"flex", alignItems:"center", gap:10, cursor:"pointer" }}>
+                <div style={{ width:36, height:36, borderRadius:"50%", background:bg, display:"flex", alignItems:"center", justifyContent:"center", fontSize:12, fontWeight:500, color:fg, flexShrink:0 }}>{ini(m.name)}</div>
+                <div style={{ flex:1, minWidth:0 }}>
+                  <div style={{ fontWeight:500, fontSize:14 }}>{m.name}</div>
+                  <div style={{ fontSize:11, color:"var(--color-text-tertiary)" }}>{m.dept}{m.email ? ` · ${m.email}` : ""}</div>
+                  {/* Profiling progress bar */}
+                  <div style={{ display:"flex", alignItems:"center", gap:6, marginTop:5 }}>
+                    <div style={{ flex:1, maxWidth:120, background:"var(--color-background-secondary)", borderRadius:3, height:4 }}>
+                      <div style={{ background:profBarColor, height:4, borderRadius:3, width:`${profPct}%`, transition:"width 0.4s" }} />
+                    </div>
+                    <span style={{ fontSize:10, color:profBarColor, fontWeight:500, whiteSpace:"nowrap" }}>{profiledCount}/{allMenteeIds.length} profiled</span>
+                  </div>
+                </div>
+                <div style={{ display:"flex", alignItems:"center", gap:"0.75rem", flexShrink:0 }}>
+                  <span style={{ fontSize:13, fontWeight:500, color:"#3B6D11" }}>{activeCount} active{droppedCount>0 ? <span style={{ color:"#A32D2D", fontWeight:400, fontSize:11 }}> · {droppedCount} dropped</span> : ""}</span>
+                  <span style={{ fontSize:18, color:"var(--color-text-tertiary)", transform: isOpen?"rotate(90deg)":"none", display:"inline-block", transition:"transform 0.18s" }}>›</span>
+                  <button onClick={e=>{e.stopPropagation(); if(window.confirm(`Remove ${m.name} and all their ${m.rows.length} students?`)) removeMentor(m.id);}}
+                    style={{ ...S.btn, padding:"4px 9px", fontSize:11, color:"#A32D2D", borderColor:"#F09595" }}>Remove</button>
+                </div>
+              </div>
+
+              {/* Student rows */}
+              {isOpen && (
+                <div style={{ marginTop:"0.6rem", borderTop:"0.5px solid var(--color-border-tertiary)", paddingTop:"0.5rem" }}>
+                  {m.rows.length === 0
+                    ? <div style={{ fontSize:13, color:"var(--color-text-tertiary)", padding:"0.5rem 0" }}>No students match the current filter.</div>
+                    : m.rows.map((s, i) => {
+                        const sp = profiles[s.id];
+                        const sPct = sp ? pct(sp.data||{}).pct : 0;
+                        const sBadgeColor = sPct===0?"var(--color-text-tertiary)":sPct===100?"#3B6D11":"#185FA5";
+                        return (
+                      <div key={s.id} style={{ display:"flex", alignItems:"center", gap:10, padding:"5px 0", borderTop: i?"0.5px solid var(--color-border-tertiary)":"none", background: s.dropped?"#FFF5F5":"transparent", margin:"0 -1.25rem", padding:"5px 1.25rem" }}>
+                        {/* Dropped-out checkbox */}
+                        <label title={s.dropped ? "Mark as active" : "Mark as dropped out"} style={{ display:"flex", alignItems:"center", gap:5, cursor:"pointer", flexShrink:0 }}>
+                          <input type="checkbox" checked={s.dropped} onChange={()=>toggleDropped(s.id)} style={{ width:14, height:14, cursor:"pointer", accentColor:"#A32D2D" }} />
+                          <span style={{ fontSize:10, color: s.dropped?"#A32D2D":"var(--color-text-tertiary)", minWidth:42 }}>{s.dropped?"Dropped":"Active"}</span>
+                        </label>
+                        {/* Avatar */}
+                        <div style={{ width:26, height:26, borderRadius:"50%", background: s.dropped?"#F7C1C1":"#E6F1FB", display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, fontWeight:500, color: s.dropped?"#A32D2D":"#185FA5", flexShrink:0 }}>{ini(s.name)}</div>
+                        {/* Name & meta */}
+                        <div style={{ flex:1, minWidth:0 }}>
+                          <span style={{ fontSize:13, fontWeight:500, textDecoration: s.dropped?"line-through":"none", color: s.dropped?"var(--color-text-tertiary)":"var(--color-text-primary)" }}>{s.name}</span>
+                          {(s.rollNo || s.class || s.combination) && (
+                            <span style={{ fontSize:11, color:"var(--color-text-tertiary)", marginLeft:8 }}>{[s.rollNo, s.class, s.combination].filter(Boolean).join(" · ")}</span>
+                          )}
+                        </div>
+                        {/* Per-student profile % badge */}
+                        {!s.dropped && (
+                          <div style={{ display:"flex", alignItems:"center", gap:5, flexShrink:0 }}>
+                            <div style={{ width:48, background:"var(--color-background-secondary)", borderRadius:3, height:4 }}>
+                              <div style={{ background:sBadgeColor, height:4, borderRadius:3, width:`${sPct}%`, transition:"width 0.4s" }} />
+                            </div>
+                            <span style={{ fontSize:10, color:sBadgeColor, minWidth:26, textAlign:"right" }}>{sPct}%</span>
+                          </div>
+                        )}
+                        {/* Remove */}
+                        <button onClick={()=>{ if(window.confirm(`Remove ${s.name}?`)) removeStudent(s.id); }} style={{ background:"none", border:"none", color:"var(--color-text-tertiary)", cursor:"pointer", fontSize:16, padding:"2px 4px", flexShrink:0 }}>×</button>
+                      </div>
+                        );
+                      })
+                  }
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ─── Unit 2: AI Profile Builder ────────────────────────────────────────────────
+function buildSystemPrompt(student, mentor, profileData) {
+  const filled = Object.entries(profileData).filter(([,v])=>v).map(([k,v])=>`  ${ALL_FIELDS[k]?.label||k}: ${v}`).join("\n") || "  (none yet)";
+  const empty  = Object.entries(ALL_FIELDS).filter(([k])=>!profileData[k]).map(([k,{label}])=>`  ${label} [key: ${k}]`).join("\n") || "  All collected!";
+  return `You are a warm, empathetic college mentoring assistant having a casual one-on-one chat with a student. Your hidden goal is to build their profile — but it must feel like a genuine, caring conversation, never a form.
+
+Student name: ${student.name}
+Class: ${student.class || "not specified"}
+Combination / Subject: ${student.combination || "not specified"}
+Mentor: ${mentor?.name || "not assigned"}  (Dept. of ${mentor?.dept || "—"})
+
+ALREADY COLLECTED:
+${filled}
+
+FIELDS STILL NEEDED (weave naturally — highest priority first):
+${empty}
+
+CONVERSATION RULES:
+1. Be warm, friendly, genuinely curious — like a caring senior or counsellor.
+2. Ask only ONE question at a time. Let the conversation breathe.
+3. Follow up on what the student shares before pivoting to the next topic.
+4. When the student shares something emotional, acknowledge it with empathy first.
+5. Celebrate achievements with genuine enthusiasm.
+6. If the conversation drifts for 2+ exchanges, gently steer back to an uncollected field.
+7. Never reveal you are filling a form or tracking fields.
+8. Use casual, warm language — contractions, light humour, encouragement.
+9. Never repeat a question about a field already collected.
+
+CRITICAL — RESPONSE FORMAT: Respond ONLY with valid JSON, no markdown, no backticks, no text outside:
+{"message":"your reply here","updates":{"fieldKey":"extracted value"}}
+
+Only add entries to "updates" when you have actually learned something new. Use exact keys from the FIELDS STILL NEEDED list.`;
+}
+
+function Unit2({ students, mentors, profiles, saveProfiles }) {
+  const [sid, setSid] = useState("");
+  const [msgs, setMsgs] = useState([]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [profileData, setProfileData] = useState({});
+  const [started, setStarted] = useState(false);
+  const bottomRef = useRef(null);
+
+  const student = students.find(s => s.id === sid);
+  const mentor  = student ? mentors.find(m => m.id === student.mentorId) : null;
+
+  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior:"smooth" }); }, [msgs, loading]);
+  useEffect(() => {
+    if (sid && profiles[sid]) { setProfileData(profiles[sid].data||{}); setMsgs(profiles[sid].messages||[]); setStarted(true); }
+    else { setProfileData({}); setMsgs([]); setStarted(false); }
+  }, [sid]);
+
+  const persist = async (newMsgs, newData, newFieldMeta) => {
+    const existingMeta = profiles[sid]?.fieldMeta || {};
+    const mergedMeta = { ...existingMeta, ...(newFieldMeta||{}) };
+    const u = { ...profiles, [sid]: { ...(profiles[sid]||{}), data:newData, messages:newMsgs, fieldMeta:mergedMeta, lastUpdated:new Date().toISOString(), startedAt:profiles[sid]?.startedAt||new Date().toISOString() } };
+    await saveProfiles(u);
+  };
+
+  const callAI = async (apiMsgs, data) => {
+    const r = await fetch("https://api.anthropic.com/v1/messages", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:1000, system:buildSystemPrompt(student, mentor, data), messages:apiMsgs })
+    });
+    const d = await r.json();
+    const raw = d.content?.[0]?.text || "{}";
+    try { return JSON.parse(raw.replace(/```json|```/g,"").trim()); } catch { return { message:raw, updates:{} }; }
+  };
+
+  const startSession = async () => {
+    if (!student) return;
+    const isResume = !!(profiles[sid] && (profiles[sid].messages||[]).length > 0);
+    setLoading(true); setStarted(true);
+    try {
+      if (isResume) {
+        // Restore prior messages then send a "welcome back" opener
+        const priorMsgs  = profiles[sid].messages || [];
+        const priorData  = profiles[sid].data || {};
+        const resumeMsg  = { role:"user", content:"Hi, I'm back to continue our session.", hidden:true };
+        const apiHistory = [...priorMsgs.filter(m=>!m.hidden).map(m=>({role:m.role,content:m.content})), { role:"user", content:"Hi, I'm back to continue our session." }];
+        const p = await callAI(apiHistory, priorData);
+        const aiMsg = { role:"assistant", content:p.message, ts:new Date().toISOString() };
+        const newMsgs = [...priorMsgs, resumeMsg, aiMsg];
+        const newData = { ...priorData, ...(p.updates||{}) };
+        setMsgs(newMsgs); setProfileData(newData);
+        await persist(newMsgs, newData);
+      } else {
+        const p = await callAI([{ role:"user", content:"Hi! I'm here for my mentoring session." }], {});
+        const newMsgs = [{ role:"user", content:"Hi! I'm here for my mentoring session.", hidden:true }, { role:"assistant", content:p.message, ts:new Date().toISOString() }];
+        setMsgs(newMsgs); setProfileData(p.updates||{});
+        await persist(newMsgs, p.updates||{});
+      }
+    } catch { setMsgs([{ role:"assistant", content:`Hey ${student.name}! Great to connect. How are you doing today?`, ts:new Date().toISOString() }]); }
+    setLoading(false);
+  };
+
+  const send = async () => {
+    if (!input.trim()||loading||!student) return;
+    const userMsg = { role:"user", content:input.trim(), ts:new Date().toISOString() };
+    const newMsgs = [...msgs, userMsg]; setMsgs(newMsgs); setInput(""); setLoading(true);
+    try {
+      const p = await callAI(newMsgs.filter(m=>!m.hidden).map(m=>({role:m.role,content:m.content})), profileData);
+      const aiMsg = { role:"assistant", content:p.message, ts:new Date().toISOString() };
+      const final = [...newMsgs, aiMsg];
+      const newData = { ...profileData, ...(p.updates||{}) };
+      // Track per-field timestamps for newly collected fields
+      const now = new Date().toISOString();
+      const newFieldMeta = Object.fromEntries(Object.keys(p.updates||{}).map(k=>[k,{updatedAt:now,source:"ai"}]));
+      setMsgs(final); setProfileData(newData);
+      await persist(final, newData, newFieldMeta);
+    } catch { setMsgs(prev=>[...prev,{role:"assistant",content:"Sorry, I had a hiccup — could you say that again?",ts:new Date().toISOString()}]); }
+    setLoading(false);
+  };
+
+  const stats = pct(profileData);
+  const visible = msgs.filter(m=>!m.hidden);
+
+  return (
+    <div>
+      <p style={{ fontSize:13, color:"var(--color-text-secondary)", marginTop:0, marginBottom:"1rem" }}>
+        The AI mentor has a natural conversation with the student to collect their profile — no forms, no obvious questions.
+      </p>
+      <div style={{ display:"flex", gap:"0.75rem", alignItems:"center", marginBottom:"1.25rem", flexWrap:"wrap" }}>
+        <select style={{ ...S.inp, maxWidth:380 }} value={sid} onChange={e=>{setSid(e.target.value);setStarted(false);}}>
+          <option value="">Select a student…</option>
+          {mentors.map(m => (
+            <optgroup key={m.id} label={`${m.name} · ${m.dept}`}>
+              {students.filter(s=>s.mentorId===m.id&&!s.dropped).map(s=>(
+                <option key={s.id} value={s.id}>{s.name}{s.rollNo?` (${s.rollNo})`:""}</option>
+              ))}
+            </optgroup>
+          ))}
+        </select>
+        {student && !started && (
+          <button onClick={startSession} style={S.btnBlue}>
+            {profiles[sid] ? "Resume session ▶" : "Start session ▶"}
+          </button>
+        )}
+        {student && started && <span style={{ fontSize:13, color:"#3B6D11", fontWeight:500 }}>● {stats.filled}/{stats.total} fields ({stats.pct}%)</span>}
+      </div>
+
+      {student && started && (
+        <div style={{ display:"grid", gridTemplateColumns:"200px minmax(0,1fr)", gap:"1.25rem", alignItems:"start" }}>
+          {/* Sidebar */}
+          <div style={S.card}>
+            <p style={{ fontWeight:500, fontSize:13, marginTop:0, marginBottom:"0.6rem" }}>Profile progress</p>
+            <div style={{ background:"var(--color-background-secondary)", borderRadius:4, height:5, marginBottom:"0.4rem" }}>
+              <div style={{ background:"#185FA5", height:5, borderRadius:4, width:`${stats.pct}%`, transition:"width 0.5s" }} />
+            </div>
+            <p style={{ fontSize:20, fontWeight:500, margin:"0 0 0.75rem", color:"#185FA5" }}>{stats.pct}%</p>
+            {Object.entries(PROFILE_SCHEMA).map(([ck,cat]) => {
+              const cFields = Object.keys(cat.fields);
+              const f = cFields.filter(k=>profileData[k]).length;
+              return (
+                <div key={ck} style={{ marginBottom:"0.45rem" }}>
+                  <div style={{ display:"flex", justifyContent:"space-between", fontSize:11, marginBottom:2 }}>
+                    <span style={{ color:"var(--color-text-secondary)" }}>{cat.icon} {cat.label}</span>
+                    <span style={{ color: f===cFields.length?"#3B6D11":"var(--color-text-tertiary)" }}>{f}/{cFields.length}</span>
+                  </div>
+                  <div style={{ background:"var(--color-background-secondary)", borderRadius:2, height:3 }}>
+                    <div style={{ background: f===cFields.length?"#3B6D11":"#185FA5", height:3, borderRadius:2, width:`${Math.round(f/cFields.length*100)}%`, transition:"width 0.5s" }} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Chat */}
+          <div style={{ ...S.card, display:"flex", flexDirection:"column", height:500, padding:0, overflow:"hidden" }}>
+            <div style={{ padding:"10px 14px", borderBottom:"0.5px solid var(--color-border-tertiary)", display:"flex", alignItems:"center", gap:8 }}>
+              <div style={{ width:30, height:30, borderRadius:"50%", background:"#E6F1FB", display:"flex", alignItems:"center", justifyContent:"center", fontSize:12, fontWeight:500, color:"#185FA5" }}>AI</div>
+              <div><div style={{ fontWeight:500, fontSize:13 }}>Mentor AI</div><div style={{ fontSize:11, color:"var(--color-text-tertiary)" }}>Chatting with {student.name}</div></div>
+            </div>
+            <div style={{ flex:1, overflowY:"auto", padding:"1rem", display:"flex", flexDirection:"column", gap:"0.6rem" }}>
+              {visible.map((m,i) => (
+                <div key={i} style={{ display:"flex", justifyContent: m.role==="user"?"flex-end":"flex-start" }}>
+                  <div style={{ maxWidth:"78%", padding:"8px 12px", fontSize:13, lineHeight:1.55, borderRadius: m.role==="user"?"14px 14px 3px 14px":"14px 14px 14px 3px", background: m.role==="user"?"#185FA5":"var(--color-background-secondary)", color: m.role==="user"?"#E6F1FB":"var(--color-text-primary)" }}>
+                    {m.content}
+                    {m.ts && <div style={{ fontSize:10, opacity:0.5, marginTop:3, textAlign:"right" }}>{new Date(m.ts).toLocaleTimeString()}</div>}
+                  </div>
+                </div>
+              ))}
+              {loading && <div style={{ display:"flex" }}><div style={{ background:"var(--color-background-secondary)", padding:"8px 14px", borderRadius:"14px 14px 14px 3px", fontSize:18, letterSpacing:2 }}>···</div></div>}
+              <div ref={bottomRef} />
+            </div>
+            <div style={{ padding:"8px 10px", borderTop:"0.5px solid var(--color-border-tertiary)", display:"flex", gap:6 }}>
+              <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&!e.shiftKey&&send()} placeholder={`${student.name} types here…`} disabled={loading} style={{ ...S.inp, borderRadius:18, flex:1 }} />
+              <button onClick={send} disabled={loading||!input.trim()} style={{ ...S.btnBlue, borderRadius:18, opacity: loading||!input.trim()?0.5:1 }}>Send</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {!student && <div style={{ textAlign:"center", padding:"3rem 0", color:"var(--color-text-tertiary)" }}><div style={{ fontSize:32, marginBottom:"0.5rem" }}>💬</div><div style={{ fontSize:14 }}>Select a student to begin an AI-powered profile session</div></div>}
+    </div>
+  );
+}
+
+// ─── Unit 3: Summary (editable) ───────────────────────────────────────────────
+function Unit3({ students, mentors, profiles, saveProfiles }) {
+  const [sid, setSid]           = useState("");
+  const [editingField, setEdit] = useState(null);   // {key, draft}
+  const [enhancing, setEnh]     = useState(null);   // fieldKey being AI-enhanced
+  const [toast, setToast]       = useState(null);   // brief feedback message
+
+  const student = students.find(s=>s.id===sid);
+  const mentor  = student ? mentors.find(m=>m.id===student.mentorId) : null;
+  const profile = sid ? profiles[sid] : null;
+  const stats   = profile ? pct(profile.data||{}) : null;
+
+  const showToast = msg => { setToast(msg); setTimeout(()=>setToast(null), 2200); };
+
+  // ── save a single edited field ──────────────────────────────────────────────
+  const saveField = async (key, value) => {
+    const now = new Date().toISOString();
+    const newData = { ...(profile.data||{}), [key]: value||undefined };
+    if (!value) delete newData[key];
+    const newMeta = { ...(profile.fieldMeta||{}), [key]: { updatedAt:now, source:"manual" } };
+    const updated = { ...profiles, [sid]: { ...profile, data:newData, fieldMeta:newMeta, lastUpdated:now } };
+    await saveProfiles(updated);
+    setEdit(null);
+    showToast(value ? "Field saved" : "Field cleared");
+  };
+
+  // ── delete a single field ───────────────────────────────────────────────────
+  const deleteField = async key => {
+    if (!window.confirm(`Clear "${ALL_FIELDS[key]?.label}"?`)) return;
+    await saveField(key, "");
+  };
+
+  // ── AI-enhance a single field ───────────────────────────────────────────────
+  const enhanceField = async (key, currentValue) => {
+    setEnh(key);
+    try {
+      const r = await fetch("https://api.anthropic.com/v1/messages", {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({
+          model:"claude-sonnet-4-20250514", max_tokens:300,
+          messages:[{ role:"user", content:`You are helping improve a student profile field.
+Field: "${ALL_FIELDS[key]?.label}"
+Current answer: "${currentValue}"
+Student name: ${student.name}, Class: ${student.class||""}
+
+Rewrite the answer to be clearer, more complete, and better phrased. Keep it concise (1-3 sentences max). Return ONLY the improved text, nothing else.` }]
+        })
+      });
+      const d = await r.json();
+      const improved = d.content?.[0]?.text?.trim();
+      if (improved) {
+        setEdit({ key, draft: improved });
+        showToast("AI suggestion ready — review and save");
+      }
+    } catch { showToast("Enhancement failed — try again"); }
+    setEnh(null);
+  };
+
+  const fmtMeta = (key) => {
+    const m = profile?.fieldMeta?.[key];
+    if (!m) return null;
+    const when = new Date(m.updatedAt).toLocaleString("en-IN",{dateStyle:"short",timeStyle:"short"});
+    return `${m.source==="manual"?"Edited":"AI collected"} · ${when}`;
+  };
+
+  return (
+    <div style={{ position:"relative" }}>
+      {/* Toast */}
+      {toast && (
+        <div style={{ position:"fixed", bottom:24, left:"50%", transform:"translateX(-50%)", background:"#185FA5", color:"#E6F1FB", padding:"8px 20px", borderRadius:20, fontSize:13, zIndex:999, pointerEvents:"none" }}>
+          {toast}
+        </div>
+      )}
+
+      <p style={{ fontSize:13, color:"var(--color-text-secondary)", marginTop:0, marginBottom:"1rem" }}>
+        View and edit a student's profile. Use ✏️ to edit, × to delete, ✨ to let AI improve an answer.
+      </p>
+
+      <div style={{ marginBottom:"1.25rem" }}>
+        <select style={{ ...S.inp, maxWidth:420 }} value={sid} onChange={e=>{setSid(e.target.value);setEdit(null);}}>
+          <option value="">Select a student…</option>
+          {mentors.map(m=>(
+            <optgroup key={m.id} label={`${m.name} · ${m.dept}`}>
+              {students.filter(s=>s.mentorId===m.id).map(s=>{
+                const hasP = !!profiles[s.id];
+                return <option key={s.id} value={s.id}>{hasP?"✅":"○"} {s.name}{s.rollNo?` (${s.rollNo})`:""}{s.dropped?" — dropped":""}</option>;
+              })}
+            </optgroup>
+          ))}
+        </select>
+      </div>
+
+      {student && profile && (
+        <div>
+          {/* Header */}
+          <div style={{ ...S.card, marginBottom:"0.9rem", display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:"0.75rem" }}>
+            <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+              <div style={{ width:44, height:44, borderRadius:"50%", background:"#E6F1FB", display:"flex", alignItems:"center", justifyContent:"center", fontSize:15, fontWeight:500, color:"#185FA5" }}>{ini(student.name)}</div>
+              <div>
+                <div style={{ fontWeight:500, fontSize:16 }}>{student.name}</div>
+                <div style={{ fontSize:12, color:"var(--color-text-secondary)" }}>{[student.class, student.rollNo?`Roll: ${student.rollNo}`:null, student.combination].filter(Boolean).join(" · ")}</div>
+                <div style={{ fontSize:12, color:"var(--color-text-tertiary)" }}>Mentor: {mentor?.name || "Unassigned"}{mentor?.dept ? ` · ${mentor.dept}`:""}</div>
+              </div>
+            </div>
+            <div style={{ textAlign:"right" }}>
+              <div style={{ fontSize:26, fontWeight:500, color:"#185FA5" }}>{stats.pct}%</div>
+              <div style={{ fontSize:11, color:"var(--color-text-tertiary)" }}>profile complete</div>
+              <div style={{ background:"var(--color-background-secondary)", borderRadius:3, height:4, width:90, marginTop:5, marginLeft:"auto" }}>
+                <div style={{ background:"#185FA5", height:4, borderRadius:3, width:`${stats.pct}%` }} />
+              </div>
+            </div>
+          </div>
+
+          {/* Timestamps */}
+          <div style={{ ...S.card, marginBottom:"0.9rem", display:"flex", gap:"1.5rem", fontSize:12, color:"var(--color-text-secondary)", flexWrap:"wrap" }}>
+            {[["🕐 Session started", fmt(profile.startedAt)],["🔄 Last updated", fmt(profile.lastUpdated)],["💬 Messages", (profile.messages||[]).filter(m=>!m.hidden).length],["📝 Fields collected", `${stats.filled} / ${stats.total}`]].map(([label,val])=>(
+              <span key={label}>{label}: <strong style={{ color:"var(--color-text-primary)", fontWeight:500 }}>{val}</strong></span>
+            ))}
+          </div>
+
+          {/* Category cards — editable */}
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(270px,1fr))", gap:"0.75rem" }}>
+            {Object.entries(PROFILE_SCHEMA).map(([ck,cat]) => {
+              const catFields = Object.entries(cat.fields);
+              const filled = catFields.filter(([k])=>profile.data?.[k]).length;
+              return (
+                <div key={ck} style={S.card}>
+                  <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"0.5rem", paddingBottom:"0.4rem", borderBottom:"0.5px solid var(--color-border-tertiary)" }}>
+                    <span style={{ fontWeight:500, fontSize:13 }}>{cat.icon} {cat.label}</span>
+                    <span style={{ fontSize:11, color: filled===catFields.length?"#3B6D11":"var(--color-text-tertiary)" }}>{filled}/{catFields.length}</span>
+                  </div>
+
+                  {catFields.map(([k, label]) => {
+                    const val = profile.data?.[k] || "";
+                    const isEditing = editingField?.key === k;
+                    const isEnhancing = enhancing === k;
+                    const meta = fmtMeta(k);
+
+                    return (
+                      <div key={k} style={{ marginBottom:"0.65rem", paddingBottom:"0.5rem", borderBottom:"0.5px solid var(--color-border-tertiary)" }}>
+                        {/* Field label row */}
+                        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:3 }}>
+                          <div style={{ fontSize:10, color:"var(--color-text-tertiary)", textTransform:"uppercase", letterSpacing:0.4 }}>{label}</div>
+                          {/* Action buttons — always visible */}
+                          <div style={{ display:"flex", gap:3 }}>
+                            {/* Edit */}
+                            <button title="Edit this field" onClick={()=>setEdit(isEditing ? null : {key:k, draft:val})}
+                              style={{ background: isEditing?"#E6F1FB":"none", border:"none", cursor:"pointer", fontSize:12, padding:"2px 5px", borderRadius:4, color: isEditing?"#185FA5":"var(--color-text-tertiary)" }}>
+                              ✏️
+                            </button>
+                            {/* AI-enhance (only if has value or editing) */}
+                            <button title="Let AI improve this answer" onClick={()=>enhanceField(k, editingField?.key===k ? editingField.draft : val)}
+                              disabled={isEnhancing || (!val && !isEditing)}
+                              style={{ background:"none", border:"none", cursor: (!val&&!isEditing)?"default":"pointer", fontSize:12, padding:"2px 5px", borderRadius:4, color: (!val&&!isEditing)?"var(--color-border-secondary)":"var(--color-text-tertiary)", opacity: isEnhancing?0.5:1 }}>
+                              {isEnhancing ? "⏳" : "✨"}
+                            </button>
+                            {/* Delete */}
+                            {val && (
+                              <button title="Clear this field" onClick={()=>deleteField(k)}
+                                style={{ background:"none", border:"none", cursor:"pointer", fontSize:12, padding:"2px 5px", borderRadius:4, color:"var(--color-text-tertiary)" }}>
+                                ×
+                              </button>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Edit mode */}
+                        {isEditing ? (
+                          <div>
+                            <textarea
+                              value={editingField.draft}
+                              onChange={e=>setEdit({key:k, draft:e.target.value})}
+                              rows={3}
+                              autoFocus
+                              placeholder={`Enter ${label.toLowerCase()}…`}
+                              style={{ ...S.inp, width:"100%", resize:"vertical", fontSize:12, lineHeight:1.5, marginBottom:"0.4rem" }}
+                            />
+                            <div style={{ display:"flex", gap:"0.4rem" }}>
+                              <button onClick={()=>saveField(k, editingField.draft)} style={{ ...S.btnBlue, padding:"5px 12px", fontSize:12 }}>Save</button>
+                              <button onClick={()=>setEdit(null)} style={{ ...S.btn, padding:"5px 10px", fontSize:12 }}>Cancel</button>
+                              {editingField.draft && (
+                                <button onClick={()=>saveField(k,"")} style={{ ...S.btn, padding:"5px 10px", fontSize:12, color:"#A32D2D", borderColor:"#F09595" }}>Clear field</button>
+                              )}
+                            </div>
+                          </div>
+                        ) : (
+                          <div>
+                            <div style={{ fontSize:13, color: val?"var(--color-text-primary)":"var(--color-text-tertiary)", fontStyle: val?"normal":"italic", lineHeight:1.5 }}>
+                              {val || "Not collected yet"}
+                            </div>
+                            {meta && val && (
+                              <div style={{ fontSize:10, color:"var(--color-text-tertiary)", marginTop:3 }}>{meta}</div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {student && !profile && (
+        <div style={{ ...S.card, textAlign:"center", padding:"2.5rem" }}>
+          <div style={{ fontSize:28, marginBottom:"0.5rem" }}>💬</div>
+          <div style={{ fontSize:14, color:"var(--color-text-secondary)" }}>No profile session started for {student.name} yet.</div>
+          <div style={{ fontSize:13, color:"var(--color-text-tertiary)", marginTop:4 }}>Go to Unit 2 — Profile builder to begin.</div>
+        </div>
+      )}
+
+      {!student && (
+        <div style={{ textAlign:"center", padding:"3rem 0", color:"var(--color-text-tertiary)" }}>
+          <div style={{ fontSize:32, marginBottom:"0.5rem" }}>📊</div>
+          <div style={{ fontSize:14 }}>Select a student to view and edit their profile</div>
+        </div>
+      )}
+    </div>
+  );
+}
