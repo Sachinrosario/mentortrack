@@ -17,6 +17,89 @@ const ALL_FIELDS = Object.entries(PROFILE_SCHEMA).reduce((acc, [cat, { fields }]
 }, {});
 const TOTAL_FIELDS = Object.keys(ALL_FIELDS).length;
 
+// ─── Psychological profile schema (8 dimensions, 30 fields) ───────────────────
+// Based on: Big Five OCEAN, Dweck growth mindset, Duckworth grit, Goleman EQ,
+// Rotter locus of control, self-determination theory (Ryan & Deci)
+const PSYCH_SCHEMA = {
+  personality: {
+    label: "Personality (OCEAN)", icon: "🧠",
+    fields: {
+      openness:           "Openness — curiosity, creativity, imagination",
+      conscientiousness:  "Conscientiousness — discipline, organisation, follow-through",
+      extraversion:       "Extraversion — social energy, assertiveness, enthusiasm",
+      agreeableness:      "Agreeableness — empathy, cooperation, warmth",
+      emotionalStability: "Emotional stability — calm under pressure, stress tolerance"
+    }
+  },
+  mindset: {
+    label: "Mindset & beliefs", icon: "🌱",
+    fields: {
+      growthVsFixed:    "Growth vs fixed mindset tendency",
+      selfEfficacy:     "Self-efficacy — belief in own abilities",
+      locusOfControl:   "Locus of control — internal vs external attribution",
+      failureResponse:  "How they interpret and respond to failure"
+    }
+  },
+  motivation: {
+    label: "Motivation & drive", icon: "🔥",
+    fields: {
+      intrinsicDrive:       "Primary intrinsic motivators (curiosity, mastery, meaning)",
+      extrinsicDrivers:     "External motivators (grades, approval, money, status)",
+      goalOrientation:      "How they set, pursue and track goals",
+      procrastinationStyle: "How they handle tasks they find difficult or unpleasant"
+    }
+  },
+  resilience: {
+    label: "Resilience & grit", icon: "💪",
+    fields: {
+      perseverance:     "Ability to persist through difficulty (grit)",
+      setbackResponse:  "How they respond when things go wrong",
+      stressTriggers:   "Primary stress triggers and warning signs",
+      copingMechanisms: "Primary coping strategies when overwhelmed"
+    }
+  },
+  social: {
+    label: "Social & relational style", icon: "🤝",
+    fields: {
+      socialOrientation:     "Introvert / extrovert tendencies in daily life",
+      peerDynamics:          "How they relate to friends, classmates, group work",
+      authorityRelationship: "How they relate to teachers, seniors, authority figures",
+      conflictStyle:         "How they handle disagreements or confrontation"
+    }
+  },
+  emotional: {
+    label: "Emotional intelligence", icon: "❤️",
+    fields: {
+      selfAwareness:        "Awareness and understanding of own emotional states",
+      empathyLevel:         "Ability to read and respond to others' feelings",
+      emotionalExpression:  "How they communicate and express emotions",
+      impulseRegulation:    "Ability to manage strong emotional reactions"
+    }
+  },
+  values: {
+    label: "Values & identity", icon: "⭐",
+    fields: {
+      coreValues:          "What they value most — guiding principles",
+      selfConcept:         "How they see themselves — core identity strengths",
+      familyDynamics:      "Role of family expectations in their choices",
+      socialConsciousness: "Awareness of and engagement with wider social issues"
+    }
+  },
+  portrait: {
+    label: "Psychological portrait", icon: "🎭",
+    fields: {
+      dominantStrengths:       "Top 3 psychological strengths identified",
+      potentialChallenges:     "Areas that may benefit from mentoring attention",
+      mentorApproach:          "Recommended mentoring style for this student",
+      integratedSummary:       "Integrated psychological portrait (synthesised by AI)"
+    }
+  }
+};
+const PSYCH_ALL_FIELDS = Object.entries(PSYCH_SCHEMA).reduce((acc, [cat, { fields }]) => {
+  Object.entries(fields).forEach(([k, label]) => { acc[k] = { label, category: cat }; }); return acc;
+}, {});
+const PSYCH_TOTAL = Object.keys(PSYCH_ALL_FIELDS).length;
+
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 const store = {
   async get(k) { try { const r = await window.storage.get(k); return r ? JSON.parse(r.value) : null; } catch { return null; } },
@@ -24,6 +107,7 @@ const store = {
 };
 const ini = (n = "") => n.split(" ").filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join("") || "?";
 const pct = (data = {}) => { const f = Object.keys(ALL_FIELDS).filter(k => data[k]).length; return { filled: f, total: TOTAL_FIELDS, pct: Math.round(f / TOTAL_FIELDS * 100) }; };
+const psychPct = (data = {}) => { const f = Object.keys(PSYCH_ALL_FIELDS).filter(k => data[k]).length; return { filled: f, total: PSYCH_TOTAL, pct: Math.round(f / PSYCH_TOTAL * 100) }; };
 const fmt = iso => iso ? new Date(iso).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "—";
 
 // Dept colour palette
@@ -43,23 +127,27 @@ export default function App() {
   const [mentors, setMentors] = useState([]);
   const [students, setStudents] = useState([]);
   const [profiles, setProfiles] = useState({});
+  const [psychProfiles, setPsychProfiles] = useState({});
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
     (async () => {
-      const m = await store.get("mt-mentors5");
-      const s = await store.get("mt-students5");
-      const p = await store.get("mt-profiles5");
-      if (m) setMentors(m); else { setMentors(SEED_MENTORS); await store.set("mt-mentors5", SEED_MENTORS); }
-      if (s) setStudents(s); else { setStudents(SEED_STUDENTS); await store.set("mt-students5", SEED_STUDENTS); }
+      const m = await store.get("mt-mentors6");
+      const s = await store.get("mt-students6");
+      const p = await store.get("mt-profiles6");
+      const pp = await store.get("mt-psychprofiles1");
+      if (m) setMentors(m); else { setMentors(SEED_MENTORS); await store.set("mt-mentors6", SEED_MENTORS); }
+      if (s) setStudents(s); else { setStudents(SEED_STUDENTS); await store.set("mt-students6", SEED_STUDENTS); }
       if (p) setProfiles(p);
+      if (pp) setPsychProfiles(pp);
       setReady(true);
     })();
   }, []);
 
-  const saveMentors  = async d => { setMentors(d);  await store.set("mt-mentors5", d); };
-  const saveStudents = async d => { setStudents(d); await store.set("mt-students5", d); };
-  const saveProfiles = async d => { setProfiles(d); await store.set("mt-profiles5", d); };
+  const saveMentors      = async d => { setMentors(d);       await store.set("mt-mentors6", d); };
+  const saveStudents     = async d => { setStudents(d);      await store.set("mt-students6", d); };
+  const saveProfiles     = async d => { setProfiles(d);      await store.set("mt-profiles6", d); };
+  const savePsychProfiles= async d => { setPsychProfiles(d); await store.set("mt-psychprofiles1", d); };
 
   if (!ready) return <div style={{ display:"flex", alignItems:"center", justifyContent:"center", height:200, color:"var(--color-text-secondary)", fontSize:14 }}>Loading…</div>;
 
@@ -68,7 +156,7 @@ export default function App() {
       {/* Tab bar */}
       <div style={{ borderBottom:"0.5px solid var(--color-border-tertiary)", padding:"0 1.5rem", display:"flex", alignItems:"center", gap:2 }}>
         <span style={{ fontWeight:500, fontSize:14, marginRight:"1rem", color:"var(--color-text-secondary)" }}>MentorTrack</span>
-        {[["Repository","1"],["Profile builder","2"],["Summary","3"]].map(([label, id]) => (
+        {[["Repository","1"],["Profile builder","2"],["Psych profiler","3"],["Summary","4"]].map(([label, id]) => (
           <button key={id} onClick={() => setUnit(+id)} style={{ padding:"10px 14px", background:"transparent", border:"none", borderBottom: unit===+id ? "2px solid #185FA5":"2px solid transparent", color: unit===+id ? "#185FA5":"var(--color-text-secondary)", cursor:"pointer", fontSize:13, fontWeight: unit===+id ? 500:400 }}>
             Unit {id} — {label}
           </button>
@@ -79,16 +167,17 @@ export default function App() {
         </div>
       </div>
       <div style={{ padding:"1.25rem 1.5rem" }}>
-        {unit===1 && <Unit1 mentors={mentors} students={students} profiles={profiles} saveMentors={saveMentors} saveStudents={saveStudents} />}
+        {unit===1 && <Unit1 mentors={mentors} students={students} profiles={profiles} psychProfiles={psychProfiles} saveMentors={saveMentors} saveStudents={saveStudents} />}
         {unit===2 && <Unit2 students={students} mentors={mentors} profiles={profiles} saveProfiles={saveProfiles} />}
-        {unit===3 && <Unit3 students={students} mentors={mentors} profiles={profiles} saveProfiles={saveProfiles} />}
+        {unit===3 && <Unit3Psych students={students} mentors={mentors} psychProfiles={psychProfiles} savePsychProfiles={savePsychProfiles} />}
+        {unit===4 && <Unit4Summary students={students} mentors={mentors} profiles={profiles} saveProfiles={saveProfiles} />}
       </div>
     </div>
   );
 }
 
 // ─── Unit 1: Repository ────────────────────────────────────────────────────────
-function Unit1({ mentors, students, profiles, saveMentors, saveStudents }) {
+function Unit1({ mentors, students, profiles, psychProfiles, saveMentors, saveStudents }) {
   const [search, setSearch]         = useState("");
   const [filterMentor, setFilter]   = useState("all");
   const [filterClass, setFilterCls] = useState("all");
@@ -210,7 +299,10 @@ function Unit1({ mentors, students, profiles, saveMentors, saveStudents }) {
           const allMenteeIds   = students.filter(s=>s.mentorId===m.id&&!s.dropped).map(s=>s.id);
           const profiledCount  = allMenteeIds.filter(id=>profiles[id]&&Object.keys(profiles[id].data||{}).length>0).length;
           const profPct        = allMenteeIds.length > 0 ? Math.round(profiledCount/allMenteeIds.length*100) : 0;
+          const psychCount     = allMenteeIds.filter(id=>psychProfiles[id]&&Object.keys(psychProfiles[id].data||{}).length>0).length;
+          const psychPctVal    = allMenteeIds.length > 0 ? Math.round(psychCount/allMenteeIds.length*100) : 0;
           const profBarColor   = profPct===100?"#3B6D11":profPct>=50?"#185FA5":"#854F0B";
+          const psychBarColor  = psychPctVal===100?"#993556":psychPctVal>=50?"#533AB7":"#5F5E5A";
           return (
             <div key={m.id} style={S.card}>
               {/* Mentor header row */}
@@ -219,12 +311,16 @@ function Unit1({ mentors, students, profiles, saveMentors, saveStudents }) {
                 <div style={{ flex:1, minWidth:0 }}>
                   <div style={{ fontWeight:500, fontSize:14 }}>{m.name}</div>
                   <div style={{ fontSize:11, color:"var(--color-text-tertiary)" }}>{m.dept}{m.email ? ` · ${m.email}` : ""}</div>
-                  {/* Profiling progress bar */}
+                  {/* Profiling progress bars */}
                   <div style={{ display:"flex", alignItems:"center", gap:6, marginTop:5 }}>
-                    <div style={{ flex:1, maxWidth:120, background:"var(--color-background-secondary)", borderRadius:3, height:4 }}>
+                    <div style={{ flex:1, maxWidth:110, background:"var(--color-background-secondary)", borderRadius:3, height:4 }}>
                       <div style={{ background:profBarColor, height:4, borderRadius:3, width:`${profPct}%`, transition:"width 0.4s" }} />
                     </div>
-                    <span style={{ fontSize:10, color:profBarColor, fontWeight:500, whiteSpace:"nowrap" }}>{profiledCount}/{allMenteeIds.length} profiled</span>
+                    <span style={{ fontSize:10, color:profBarColor, fontWeight:500, whiteSpace:"nowrap" }}>{profiledCount}/{allMenteeIds.length} profile</span>
+                    <div style={{ flex:1, maxWidth:110, background:"var(--color-background-secondary)", borderRadius:3, height:4, marginLeft:4 }}>
+                      <div style={{ background:psychBarColor, height:4, borderRadius:3, width:`${psychPctVal}%`, transition:"width 0.4s" }} />
+                    </div>
+                    <span style={{ fontSize:10, color:psychBarColor, fontWeight:500, whiteSpace:"nowrap" }}>{psychCount}/{allMenteeIds.length} psych</span>
                   </div>
                 </div>
                 <div style={{ display:"flex", alignItems:"center", gap:"0.75rem", flexShrink:0 }}>
@@ -244,6 +340,9 @@ function Unit1({ mentors, students, profiles, saveMentors, saveStudents }) {
                         const sp = profiles[s.id];
                         const sPct = sp ? pct(sp.data||{}).pct : 0;
                         const sBadgeColor = sPct===0?"var(--color-text-tertiary)":sPct===100?"#3B6D11":"#185FA5";
+                        const spp = psychProfiles[s.id];
+                        const spPct = spp ? psychPct(spp.data||{}).pct : 0;
+                        const spBadgeColor = spPct===0?"var(--color-text-tertiary)":spPct===100?"#993556":"#533AB7";
                         return (
                       <div key={s.id} style={{ display:"flex", alignItems:"center", gap:10, padding:"5px 0", borderTop: i?"0.5px solid var(--color-border-tertiary)":"none", background: s.dropped?"#FFF5F5":"transparent", margin:"0 -1.25rem", padding:"5px 1.25rem" }}>
                         {/* Dropped-out checkbox */}
@@ -263,10 +362,14 @@ function Unit1({ mentors, students, profiles, saveMentors, saveStudents }) {
                         {/* Per-student profile % badge */}
                         {!s.dropped && (
                           <div style={{ display:"flex", alignItems:"center", gap:5, flexShrink:0 }}>
-                            <div style={{ width:48, background:"var(--color-background-secondary)", borderRadius:3, height:4 }}>
+                            <div style={{ width:40, background:"var(--color-background-secondary)", borderRadius:3, height:4 }}>
                               <div style={{ background:sBadgeColor, height:4, borderRadius:3, width:`${sPct}%`, transition:"width 0.4s" }} />
                             </div>
-                            <span style={{ fontSize:10, color:sBadgeColor, minWidth:26, textAlign:"right" }}>{sPct}%</span>
+                            <span style={{ fontSize:9, color:sBadgeColor, minWidth:22, textAlign:"right" }}>{sPct}%P</span>
+                            <div style={{ width:40, background:"var(--color-background-secondary)", borderRadius:3, height:4 }}>
+                              <div style={{ background:spBadgeColor, height:4, borderRadius:3, width:`${spPct}%`, transition:"width 0.4s" }} />
+                            </div>
+                            <span style={{ fontSize:9, color:spBadgeColor, minWidth:22, textAlign:"right" }}>{spPct}%Ψ</span>
                           </div>
                         )}
                         {/* Remove */}
@@ -483,8 +586,364 @@ function Unit2({ students, mentors, profiles, saveProfiles }) {
   );
 }
 
-// ─── Unit 3: Summary (editable) ───────────────────────────────────────────────
-function Unit3({ students, mentors, profiles, saveProfiles }) {
+// ─── Unit 3: Psychological Profiler ────────────────────────────────────────────
+// Based on: Big Five OCEAN, Dweck growth mindset, Duckworth grit,
+// Goleman emotional intelligence, Rotter locus of control,
+// TAT-inspired scenario questions, RISB sentence completion approach
+function buildPsychPrompt(student, mentor, psychData) {
+  const observed = Object.entries(psychData).filter(([,v])=>v)
+    .map(([k,v])=>`  [${PSYCH_ALL_FIELDS[k]?.label||k}]: ${v}`).join("\n") || "  (none yet)";
+  const pending = Object.entries(PSYCH_ALL_FIELDS).filter(([k])=>!psychData[k])
+    .map(([k,{label}])=>`  ${label} [key: ${k}]`).join("\n") || "  All dimensions explored!";
+  const exchangeCount = Object.keys(psychData).length;
+
+  return `You are a deeply perceptive college mentor having a warm, natural conversation with a student. Your hidden purpose is to build a psychological portrait of this student using indirect questioning — the conversation must always feel like talking to a thoughtful, caring senior, never like a test.
+
+You are trained in: Big Five personality theory (OCEAN), Carol Dweck's growth mindset research, Angela Duckworth's grit and perseverance model, Daniel Goleman's emotional intelligence framework, and Rotter's locus of control theory. Use these frameworks to interpret student responses — but NEVER mention them or use their terminology (never say "growth mindset", "locus of control", "introvert", "Big Five" etc.).
+
+Student: ${student.name} | Class: ${student.class||"not specified"} | Subject: ${student.combination||"—"}
+Mentor: ${mentor?.name||"not assigned"} (${mentor?.dept||"—"})
+
+PSYCHOLOGICAL DIMENSIONS OBSERVED SO FAR:
+${observed}
+
+DIMENSIONS STILL NEEDING EXPLORATION:
+${pending}
+
+QUESTION TECHNIQUE TOOLKIT — rotate through these naturally:
+① SCENARIO: "Imagine you're [situation]... what do you do?" — reveals values, conflict style, social dynamics
+② REFLECTIVE: "Tell me about a time when you [experience]..." — reveals resilience, coping, mindset  
+③ PREFERENCE: "If you had to choose between [A] or [B], which feels more like you and why?" — reveals personality
+④ PROJECTIVE: "If your college life right now were a [movie genre / weather / season / animal], what would it be?" — reveals emotional state, self-concept
+⑤ COMPLETION: "The thing that worries me most is..." / "When things get really tough, I usually..." — reveals inner world
+⑥ HYPOTHETICAL: "If you could change one thing about how you approach [study/people/problems], what would it be?" — reveals self-awareness
+
+CONVERSATION RULES:
+1. Warm, curious, genuinely interested — like a wise friend who truly wants to understand
+2. Ask ONLY ONE question per message. Never stack questions.
+3. After the student shares something, reflect briefly before asking the next question ("That makes sense..." / "I can see why...")
+4. If they share something heavy or emotional, acknowledge it with warmth before moving forward
+5. Mix light questions with deeper ones — alternate surface and depth
+6. After 8+ exchanges, start gently synthesising: "It seems like you're someone who..."
+7. After 18+ exchanges, use the portrait fields to write the integrated summary
+8. NEVER reveal you are building a psychological profile
+9. NEVER use psychological jargon or framework names
+10. NEVER ask about the same dimension twice
+11. Keep your messages SHORT — 1-3 sentences max, then the question
+
+EXTRACTING INSIGHTS — be interpretive, not literal:
+When you observe something psychologically meaningful, extract a SHORT interpretive note:
+- Student says "I just keep going, giving up feels wrong" → extract for perseverance: "High grit; frames persistence as a natural orientation rather than effort"
+- Student says "I prefer working alone, groups complicate things" → extract for socialOrientation: "Strong introvert tendency; group work perceived as cognitively costly, prefers depth over breadth of social engagement"
+- Student says "My parents expect me to be an engineer but I want to do design" → extract for familyDynamics: "High parental influence on career; experiencing identity conflict between family expectation and intrinsic interest"
+
+For the 'portrait' category fields (dominantStrengths, potentialChallenges, mentorApproach, integratedSummary) — write these ONLY after exploring most other dimensions. Make them rich, specific, and actionable for the mentor.
+
+CRITICAL — RESPONSE FORMAT: Valid JSON only, no markdown, no backticks:
+{"message":"your conversational reply (1-3 sentences + question)","updates":{"dimensionKey":"your interpretive observation"}}
+
+Only extract when you have genuine insight. Be interpretive and specific, not generic.`;
+}
+
+function Unit3Psych({ students, mentors, psychProfiles, savePsychProfiles }) {
+  const [sid, setSid]         = useState("");
+  const [msgs, setMsgs]       = useState([]);
+  const [input, setInput]     = useState("");
+  const [loading, setLoading] = useState(false);
+  const [psychData, setPsychData] = useState({});
+  const [started, setStarted] = useState(false);
+  const [synthesising, setSynthesising] = useState(false);
+  const bottomRef = useRef(null);
+
+  const student = students.find(s=>s.id===sid);
+  const mentor  = student ? mentors.find(m=>m.id===student.mentorId) : null;
+
+  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior:"smooth" }); }, [msgs, loading]);
+  useEffect(() => {
+    if (sid && psychProfiles[sid]) {
+      setPsychData(psychProfiles[sid].data||{});
+      setMsgs(psychProfiles[sid].messages||[]);
+      setStarted(true);
+    } else {
+      setPsychData({}); setMsgs([]); setStarted(false);
+    }
+  }, [sid]);
+
+  const persist = async (newMsgs, newData) => {
+    const u = { ...psychProfiles, [sid]: {
+      ...(psychProfiles[sid]||{}),
+      data: newData, messages: newMsgs,
+      lastUpdated: new Date().toISOString(),
+      startedAt: psychProfiles[sid]?.startedAt || new Date().toISOString()
+    }};
+    await savePsychProfiles(u);
+  };
+
+  const callAI = async (apiMsgs, data) => {
+    const r = await fetch("https://api.anthropic.com/v1/messages", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:1200,
+        system: buildPsychPrompt(student, mentor, data), messages: apiMsgs })
+    });
+    const d = await r.json();
+    const raw = d.content?.[0]?.text || "{}";
+    try { return JSON.parse(raw.replace(/```json|```/g,"").trim()); }
+    catch { return { message: raw, updates:{} }; }
+  };
+
+  const startSession = async () => {
+    if (!student) return;
+    const isResume = !!(psychProfiles[sid]&&(psychProfiles[sid].messages||[]).length>0);
+    setLoading(true); setStarted(true);
+    try {
+      if (isResume) {
+        const priorMsgs = psychProfiles[sid].messages||[];
+        const priorData = psychProfiles[sid].data||{};
+        const hiddenMsg = { role:"user", content:"Hi, I wanted to continue our conversation.", hidden:true };
+        const apiHistory = [...priorMsgs.filter(m=>!m.hidden).map(m=>({role:m.role,content:m.content})),
+                           { role:"user", content:"Hi, I wanted to continue our conversation." }];
+        const p = await callAI(apiHistory, priorData);
+        const aiMsg = { role:"assistant", content:p.message, ts:new Date().toISOString() };
+        const newMsgs = [...priorMsgs, hiddenMsg, aiMsg];
+        const newData = { ...priorData, ...(p.updates||{}) };
+        setMsgs(newMsgs); setPsychData(newData);
+        await persist(newMsgs, newData);
+      } else {
+        // First session — warm opener
+        const opener = [{ role:"user", content:"Hey! I have some free time, thought I'd stop by for a chat.", hidden:true }];
+        const p = await callAI([{ role:"user", content:"Hey! I have some free time, thought I'd stop by for a chat." }], {});
+        const newMsgs = [...opener, { role:"assistant", content:p.message, ts:new Date().toISOString() }];
+        setMsgs(newMsgs); setPsychData(p.updates||{});
+        await persist(newMsgs, p.updates||{});
+      }
+    } catch {
+      setMsgs([{ role:"assistant", content:`Hey ${student.name}! Great to see you — grab a seat. How's everything been lately?`, ts:new Date().toISOString() }]);
+    }
+    setLoading(false);
+  };
+
+  const send = async () => {
+    if (!input.trim()||loading||!student) return;
+    const userMsg = { role:"user", content:input.trim(), ts:new Date().toISOString() };
+    const newMsgs = [...msgs, userMsg]; setMsgs(newMsgs); setInput(""); setLoading(true);
+    try {
+      const apiMsgs = newMsgs.filter(m=>!m.hidden).map(m=>({role:m.role,content:m.content}));
+      const p = await callAI(apiMsgs, psychData);
+      const aiMsg = { role:"assistant", content:p.message, ts:new Date().toISOString() };
+      const final = [...newMsgs, aiMsg];
+      const newData = { ...psychData, ...(p.updates||{}) };
+      setMsgs(final); setPsychData(newData);
+      await persist(final, newData);
+    } catch { setMsgs(prev=>[...prev,{ role:"assistant", content:"Sorry, lost my train of thought — could you say that again?", ts:new Date().toISOString() }]); }
+    setLoading(false);
+  };
+
+  // Synthesise full portrait from all collected observations
+  const synthesise = async () => {
+    setSynthesising(true);
+    try {
+      const observations = Object.entries(psychData).filter(([,v])=>v)
+        .map(([k,v])=>`${PSYCH_ALL_FIELDS[k]?.label||k}: ${v}`).join("\n");
+      const r = await fetch("https://api.anthropic.com/v1/messages", {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:1500,
+          messages:[{ role:"user", content:`You are an expert educational psychologist writing a confidential mentoring portrait.
+
+Student: ${student.name} | ${student.class||""} | Mentor: ${mentor?.name||""}
+
+OBSERVATIONS COLLECTED:
+${observations}
+
+Based on these observations, write the following four fields. Respond ONLY with valid JSON, no markdown:
+{
+  "dominantStrengths": "Identify the student's top 3 psychological strengths with brief evidence from observations. Be specific and positive.",
+  "potentialChallenges": "Identify 2-3 areas that may benefit from mentoring attention. Be compassionate, not clinical. Focus on patterns that could affect academic or personal growth.",
+  "mentorApproach": "Recommend a specific mentoring style for this student — how should the mentor communicate, challenge, and support them? Give 3-4 concrete suggestions.",
+  "integratedSummary": "Write a 3-4 sentence integrated psychological portrait of this student. It should read like something a wise counsellor would write — specific, humane, and useful for building a meaningful mentoring relationship. Avoid jargon."
+}` }]
+        })
+      });
+      const d = await r.json();
+      const raw = d.content?.[0]?.text||"{}";
+      const parsed = JSON.parse(raw.replace(/```json|```/g,"").trim());
+      const now = new Date().toISOString();
+      const newData = { ...psychData, ...parsed };
+      setPsychData(newData);
+      const u = { ...psychProfiles, [sid]: {
+        ...(psychProfiles[sid]||{}),
+        data: newData, messages: msgs,
+        lastUpdated: now, synthesised: true,
+        startedAt: psychProfiles[sid]?.startedAt||now
+      }};
+      await savePsychProfiles(u);
+    } catch { /* silent */ }
+    setSynthesising(false);
+  };
+
+  const stats = psychPct(psychData);
+  const visible = msgs.filter(m=>!m.hidden);
+  const msgCount = visible.length;
+  const canSynthesise = stats.filled >= 10 && !psychData.integratedSummary;
+  const hasSynthesis = !!psychData.integratedSummary;
+
+  // Category colours for psych
+  const PSYCH_COLORS = {
+    personality:"#533AB7", mindset:"#3B6D11", motivation:"#854F0B",
+    resilience:"#185FA5", social:"#0F6E56", emotional:"#993556",
+    values:"#854F0B", portrait:"#2C2C2A"
+  };
+
+  return (
+    <div>
+      <div style={{ ...S.card, marginBottom:"1rem", background:"#EEEDFE", borderColor:"#AFA9EC" }}>
+        <div style={{ fontWeight:500, fontSize:13, color:"#3C3489", marginBottom:4 }}>Unit 3 — Psychological Profiler</div>
+        <div style={{ fontSize:12, color:"#534AB7", lineHeight:1.6 }}>
+          This unit uses indirect, scenario-based conversation to reveal a student's inner psychology — personality, mindset, resilience, emotional intelligence, values and more — without them knowing they're being assessed. Based on Big Five OCEAN, growth mindset (Dweck), grit (Duckworth), and EQ (Goleman) frameworks. Sessions typically take 20–30 minutes of natural conversation.
+        </div>
+      </div>
+
+      <div style={{ display:"flex", gap:"0.75rem", alignItems:"center", marginBottom:"1.25rem", flexWrap:"wrap" }}>
+        <select style={{ ...S.inp, maxWidth:380 }} value={sid} onChange={e=>{setSid(e.target.value);setStarted(false);}}>
+          <option value="">Select a student…</option>
+          {mentors.map(m=>(
+            <optgroup key={m.id} label={`${m.name} · ${m.dept}`}>
+              {students.filter(s=>s.mentorId===m.id&&!s.dropped).map(s=>{
+                const hasPsych = !!(psychProfiles[s.id]&&Object.keys(psychProfiles[s.id].data||{}).length>0);
+                return <option key={s.id} value={s.id}>{hasPsych?"🔮":"○"} {s.name}{s.rollNo?` (${s.rollNo})`:""}</option>;
+              })}
+            </optgroup>
+          ))}
+        </select>
+        {student && !started && (
+          <button onClick={startSession} style={{ ...S.btnBlue, background:"#533AB7" }}>
+            {psychProfiles[sid] ? "Resume session ▶" : "Begin session ▶"}
+          </button>
+        )}
+        {student && started && (
+          <span style={{ fontSize:13, color:"#533AB7", fontWeight:500 }}>🔮 {stats.filled}/{stats.total} dimensions ({stats.pct}%) · {msgCount} exchanges</span>
+        )}
+        {canSynthesise && (
+          <button onClick={synthesise} disabled={synthesising} style={{ ...S.btnBlue, background:"#993556", opacity:synthesising?0.6:1, fontSize:12 }}>
+            {synthesising?"✨ Synthesising…":"✨ Generate psychological portrait"}
+          </button>
+        )}
+        {hasSynthesis && (
+          <span style={{ fontSize:12, color:"#993556", fontWeight:500 }}>🎭 Portrait synthesised</span>
+        )}
+      </div>
+
+      {student && started && (
+        <div style={{ display:"grid", gridTemplateColumns:"220px minmax(0,1fr)", gap:"1.25rem", alignItems:"start" }}>
+          {/* Sidebar — live dimension tracker */}
+          <div>
+            <div style={{ ...S.card, marginBottom:"0.75rem" }}>
+              <p style={{ fontWeight:500, fontSize:13, marginTop:0, marginBottom:"0.5rem", color:"#533AB7" }}>Psychological profile</p>
+              <div style={{ background:"var(--color-background-secondary)", borderRadius:4, height:5, marginBottom:"0.4rem" }}>
+                <div style={{ background:"#533AB7", height:5, borderRadius:4, width:`${stats.pct}%`, transition:"width 0.5s" }} />
+              </div>
+              <p style={{ fontSize:20, fontWeight:500, margin:"0 0 0.75rem", color:"#533AB7" }}>{stats.pct}%</p>
+              {Object.entries(PSYCH_SCHEMA).map(([ck,cat]) => {
+                const cF = Object.keys(cat.fields); const f = cF.filter(k=>psychData[k]).length;
+                const catColor = PSYCH_COLORS[ck]||"#533AB7";
+                return (
+                  <div key={ck} style={{ marginBottom:"0.45rem" }}>
+                    <div style={{ display:"flex", justifyContent:"space-between", fontSize:10, marginBottom:2 }}>
+                      <span style={{ color:"var(--color-text-secondary)" }}>{cat.icon} {cat.label}</span>
+                      <span style={{ color: f===cF.length?catColor:"var(--color-text-tertiary)", fontWeight: f===cF.length?500:400 }}>{f}/{cF.length}</span>
+                    </div>
+                    <div style={{ background:"var(--color-background-secondary)", borderRadius:2, height:3 }}>
+                      <div style={{ background: f===cF.length?catColor:catColor+"88", height:3, borderRadius:2, width:`${Math.round(f/cF.length*100)}%`, transition:"width 0.5s" }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Recently extracted insights */}
+            {Object.keys(psychData).length > 0 && (
+              <div style={{ ...S.card, fontSize:11 }}>
+                <p style={{ fontWeight:500, fontSize:12, marginTop:0, marginBottom:"0.5rem", color:"var(--color-text-secondary)" }}>Latest observations</p>
+                {Object.entries(psychData).filter(([,v])=>v).slice(-5).map(([k,v])=>(
+                  <div key={k} style={{ marginBottom:"0.5rem", paddingBottom:"0.4rem", borderBottom:"0.5px solid var(--color-border-tertiary)" }}>
+                    <div style={{ fontSize:9, color:"var(--color-text-tertiary)", textTransform:"uppercase", letterSpacing:0.4, marginBottom:2 }}>
+                      {PSYCH_ALL_FIELDS[k]?.label||k}
+                    </div>
+                    <div style={{ color:"var(--color-text-secondary)", lineHeight:1.4 }}>{String(v).slice(0,80)}{String(v).length>80?"…":""}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Chat panel */}
+          <div style={{ ...S.card, display:"flex", flexDirection:"column", height:560, padding:0, overflow:"hidden" }}>
+            <div style={{ padding:"10px 14px", borderBottom:"0.5px solid var(--color-border-tertiary)", display:"flex", alignItems:"center", gap:8, background:"#EEEDFE" }}>
+              <div style={{ width:30, height:30, borderRadius:"50%", background:"#533AB7", display:"flex", alignItems:"center", justifyContent:"center", fontSize:14, color:"#EEEDFE" }}>🔮</div>
+              <div>
+                <div style={{ fontWeight:500, fontSize:13 }}>Psych Session</div>
+                <div style={{ fontSize:11, color:"#534AB7" }}>Deep-dive conversation with {student.name} · {msgCount} exchanges</div>
+              </div>
+            </div>
+            <div style={{ flex:1, overflowY:"auto", padding:"1rem", display:"flex", flexDirection:"column", gap:"0.6rem" }}>
+              {visible.map((m,i)=>(
+                <div key={i} style={{ display:"flex", justifyContent:m.role==="user"?"flex-end":"flex-start" }}>
+                  <div style={{ maxWidth:"78%", padding:"8px 12px", fontSize:13, lineHeight:1.55,
+                    borderRadius:m.role==="user"?"14px 14px 3px 14px":"14px 14px 14px 3px",
+                    background:m.role==="user"?"#533AB7":"var(--color-background-secondary)",
+                    color:m.role==="user"?"#EEEDFE":"var(--color-text-primary)" }}>
+                    {m.content}
+                    {m.ts && <div style={{ fontSize:10, opacity:0.5, marginTop:3, textAlign:"right" }}>{new Date(m.ts).toLocaleTimeString()}</div>}
+                  </div>
+                </div>
+              ))}
+              {loading && <div style={{ display:"flex" }}><div style={{ background:"var(--color-background-secondary)", padding:"8px 14px", borderRadius:"14px 14px 14px 3px", fontSize:18, letterSpacing:2 }}>···</div></div>}
+              <div ref={bottomRef} />
+            </div>
+            <div style={{ padding:"8px 10px", borderTop:"0.5px solid var(--color-border-tertiary)", display:"flex", gap:6 }}>
+              <input value={input} onChange={e=>setInput(e.target.value)}
+                onKeyDown={e=>e.key==="Enter"&&!e.shiftKey&&send()}
+                placeholder={`${student.name} types here…`} disabled={loading}
+                style={{ ...S.inp, borderRadius:18, flex:1 }} />
+              <button onClick={send} disabled={loading||!input.trim()}
+                style={{ ...S.btnBlue, borderRadius:18, background:"#533AB7", opacity:loading||!input.trim()?0.5:1 }}>Send</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Synthesised portrait display */}
+      {student && hasSynthesis && (
+        <div style={{ marginTop:"1.25rem" }}>
+          <div style={{ fontWeight:500, fontSize:14, marginBottom:"0.75rem", color:"#993556" }}>🎭 Psychological Portrait — {student.name}</div>
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))", gap:"0.75rem" }}>
+            {[
+              { key:"integratedSummary", label:"Integrated portrait", icon:"🎭", color:"#2C2C2A" },
+              { key:"dominantStrengths", label:"Dominant strengths", icon:"⭐", color:"#3B6D11" },
+              { key:"potentialChallenges", label:"Areas for attention", icon:"🔍", color:"#854F0B" },
+              { key:"mentorApproach", label:"Recommended mentor approach", icon:"🤝", color:"#185FA5" },
+            ].map(({ key, label, icon, color }) => psychData[key] ? (
+              <div key={key} style={{ ...S.card, borderLeft:`3px solid ${color}` }}>
+                <div style={{ fontWeight:500, fontSize:12, color, marginBottom:"0.5rem" }}>{icon} {label}</div>
+                <div style={{ fontSize:13, color:"var(--color-text-primary)", lineHeight:1.6 }}>{psychData[key]}</div>
+              </div>
+            ) : null)}
+          </div>
+        </div>
+      )}
+
+      {!student && (
+        <div style={{ textAlign:"center", padding:"3rem 0", color:"var(--color-text-tertiary)" }}>
+          <div style={{ fontSize:36, marginBottom:"0.5rem" }}>🔮</div>
+          <div style={{ fontSize:14 }}>Select a student to begin a psychological profiling session</div>
+          <div style={{ fontSize:12, marginTop:6, color:"var(--color-text-tertiary)" }}>Sessions use indirect, scenario-based questions — the student won't know they're being profiled</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Unit 4: Summary (editable) ───────────────────────────────────────────────
+function Unit4Summary({ students, mentors, profiles, saveProfiles }) {
   const [sid, setSid]           = useState("");
   const [editingField, setEdit] = useState(null);   // {key, draft}
   const [enhancing, setEnh]     = useState(null);   // fieldKey being AI-enhanced
